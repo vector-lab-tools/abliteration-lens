@@ -1,0 +1,32 @@
+{
+  "pan": {
+    "block": "Which blocks' attention is biased: one block, a range such as 3-7, or all.",
+    "depth": "How far the farthest key is pushed, in units of attention score: the bias reaches pan × depth at the start.",
+    "pan": "Which way attention moves: above 0 toward the most recent tokens, below 0 toward the start; 0 changes nothing."
+  },
+  "rewrite": {
+    "block": "The block whose MLP is edited (GPT-2 small has blocks 0 to 11).",
+    "prompt": "A sentence that leads up to the fact, ending where the target should follow.",
+    "subject": "The words in the prompt the fact is about; the edit is keyed to their last token.",
+    "target": "What the model should write after the prompt, usually with a leading space.",
+    "save": "A name to also save the edit under in data/patches, for the Patch strip to load.",
+    "amount": "How much of the edit is added: 0 changes nothing, 1 is the fitted edit, 2 doubles it."
+  },
+  "patch": {
+    "file": "The patch's name in data/patches, without .safetensors.",
+    "scale": "How much of the saved change is added for the run: 0 changes nothing, 1 adds it as saved."
+  },
+  "token": {
+    "word": "The word or words, between commas and with their leading spaces: \" not, never\".",
+    "mode": "zero gives the word a zero input embedding wherever it occurs; ban stops the model writing it."
+  },
+  "contrast": {
+    "keep": "Only tokens with at least this share of the diverged model's top chance can be chosen.",
+    "alpha": "How strongly the original model's chances are divided out; 0 changes nothing."
+  },
+  "sample": {
+    "mode": "ban-top forbids the likeliest tokens, ceiling forbids any above a chance, invert favours the least likely.",
+    "k": "For ban-top, how many of the most probable next tokens are forbidden.",
+    "p": "For ceiling, the highest chance a token may have and still be chosen."
+  }
+}

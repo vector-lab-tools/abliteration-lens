@@ -1,0 +1,1123 @@
+<!doctype html>
+<!-- Abliteration Lens. Copyright (C) 2026 David M. Berry. SPDX-License-Identifier: GPL-3.0-or-later -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abliteration Lens</title>
+<link rel="icon" href="mark.svg">
+<style>
+:root {
+  --bg: #f3f2ee; --surface: #fcfcfb; --surface-2: #f0efec; --border: #e2e0da;
+  --text: #0b0b0b; --text-2: #52514e; --text-3: #85837d;
+  --accent: #2a78d6; --accent-soft: #dbe9fb; --good: #0c8a0c; --critical: #d03b3b; --amber: #b7791f;
+  --shadow: 0 1px 2px rgba(10,14,30,.05), 0 8px 24px rgba(10,14,30,.06);
+  --ink-1: #0c1020; --s-text: #e9eefb; --s-text-2: #a9b3cf; --s-text-3: #6f7a99;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --add: #d9f2d9; --add-ink: #145c14; --rem: #f8dcdc; --rem-ink: #8a1f1f; --mark: #fff0b8;
+  --a-observation: #2563eb; --a-question: #d97706; --a-metaphor: #9333ea; --a-pattern: #16a34a; --a-context: #64748b; --a-critique: #8b2942;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1116; --surface: #171a21; --surface-2: #1f232c; --border: #2c313c;
+    --text: #ffffff; --text-2: #c3c2b7; --text-3: #8d8c84;
+    --accent: #3987e5; --accent-soft: #17345e; --shadow: none; --good: #3cc13c; --amber: #e0a43a;
+    --add: #183a1c; --add-ink: #9fe39f; --rem: #45191b; --rem-ink: #f3a6a6; --mark: #4a3f12;
+    --a-observation: #60a5fa; --a-question: #fbbf24; --a-metaphor: #c084fc; --a-pattern: #4ade80; --a-context: #94a3b8; --a-critique: #c55a75;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1116; --surface: #171a21; --surface-2: #1f232c; --border: #2c313c;
+  --text: #ffffff; --text-2: #c3c2b7; --text-3: #8d8c84;
+  --accent: #3987e5; --accent-soft: #17345e; --shadow: none; --good: #3cc13c; --amber: #e0a43a;
+  --add: #183a1c; --add-ink: #9fe39f; --rem: #45191b; --rem-ink: #f3a6a6; --mark: #4a3f12;
+  --a-observation: #60a5fa; --a-question: #fbbf24; --a-metaphor: #c084fc; --a-pattern: #4ade80; --a-context: #94a3b8; --a-critique: #c55a75;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); max-width: 100%; overflow-x: clip; }
+body { font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+.muted { color: var(--text-3); }
+a { color: var(--accent); }
+code, .mono { font-family: var(--mono); font-size: 12.5px; }
+
+/* ---------------- app bar */
+header.bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; padding: 0 18px; height: 52px; flex-wrap: nowrap;   /* one line, always: the model chip shrinks first, then the tabs scroll */
+  background: var(--ink-1); color: var(--s-text); box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 6px 20px rgba(5,8,20,.25); }
+.brand { flex: none; display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 15px; letter-spacing: .01em; white-space: nowrap; }
+.brand img { width: 22px; height: 22px; }
+.brand .ver { font-size: 10.5px; font-weight: 500; color: var(--s-text-3); }
+nav.tabs { display: flex; gap: 2px; flex-wrap: nowrap; flex: 0 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+nav.tabs::-webkit-scrollbar { display: none; }
+nav.tabs button { background: none; border: 0; color: var(--s-text-2); font: inherit; font-size: 13.5px; padding: 6px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap; flex: none; }
+nav.tabs button:hover { background: rgba(255,255,255,.09); color: var(--s-text); }
+nav.tabs button[aria-selected="true"] { background: rgba(255,255,255,.14); color: #fff; }
+.modelchip { margin-left: auto; font-size: 12.5px; color: var(--s-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1000 auto; min-width: 0; }   /* gives up its width before the tabs do */
+.modelchip b { color: var(--s-text); font-weight: 600; }
+.modelchip .busy { color: #f3c969; }
+/* the transport: run, stop, and update as the chain changes */
+.transport { flex: none; display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 8px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); }
+.tp { position: relative; width: 34px; height: 28px; display: inline-grid; place-items: center; border: 0; border-radius: 6px; background: transparent; color: var(--s-text-2); cursor: pointer; font-size: 14px; line-height: 1; padding: 0; }
+.tp:hover:not(:disabled) { background: rgba(255,255,255,.1); color: var(--s-text); }
+.tp:disabled { opacity: .35; cursor: default; }
+.tp.play { color: var(--s-text); font-size: 15px; }
+.tp.play.on, .tp.play.on:disabled { opacity: 1; color: #3ddc84; text-shadow: 0 0 8px rgba(61,220,132,.6); }
+.tp.stop:not(:disabled) { color: var(--s-text); }
+.tp.live { font-size: 16px; }
+.tp.live input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.tp.live:has(input:checked) { background: #f3a33b; color: #1a1408; }
+.tp.live:has(input:focus-visible), .tp:focus-visible { outline: 2px solid #9fb4ff; outline-offset: 1px; }
+.barbtns { flex: none; display: flex; gap: 2px; align-items: center; }
+.icon-btn { background: transparent; border: 1px solid transparent; border-radius: 6px; cursor: pointer; width: 30px; height: 30px; display: inline-grid; place-items: center; color: var(--s-text-2); font-size: 16px; padding: 0; }
+.icon-btn:hover { border-color: rgba(255,255,255,.25); color: var(--s-text); }
+#brand { cursor: pointer; }
+
+/* ---------------- the Help, About and Settings boxes (laid out as bench-kit's) */
+dialog { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 12px; padding: 0; width: min(520px, 94vw); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+dialog::backdrop { background: rgba(0,0,0,.5); }
+dialog .icon-btn { color: var(--text-2); }
+dialog .icon-btn:hover { border-color: var(--border); color: var(--text); }
+.hint { color: var(--text-3); font-size: 13px; margin: 0; }
+.settings { padding: 16px 18px; display: grid; gap: 8px; }
+.settings h2 { margin: 6px 0 0; font-size: 15px; }
+.settings label { display: grid; gap: 3px; font-size: 13px; color: var(--text-2); }
+.settings input, .settings select { font: inherit; font-size: 13.5px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; color: var(--text); }
+.settings input[type="range"] { padding: 0; flex: 1; }
+.settings .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+.settings .token-row { display: flex; gap: 8px; align-items: center; }
+.set-msg:empty { display: none; }
+.set-msg { color: var(--critical); }
+dialog.set-dlg { width: min(94vw, 560px); }
+.set-tabs { display: flex; flex-wrap: wrap; gap: 2px; border-bottom: 1px solid var(--border); margin: 0 0 6px; }
+.set-tabs button { font: 500 13px inherit; font-family: inherit; color: var(--text-3); background: none; border: 0; border-bottom: 2px solid transparent; padding: 6px 10px 7px; margin-bottom: -1px; cursor: pointer; }
+.set-tabs button:hover { color: var(--text); }
+.set-tabs button.on { color: var(--text); border-bottom-color: var(--amber); }
+.set-pane { display: grid; gap: 8px; min-height: 280px; align-content: start; }
+.set-pane[hidden] { display: none; }
+.set-foot .set-gap { flex: 1; }
+dialog.aboutbox { width: min(94vw, 620px); }
+/* ---------------- a model: Settings, Models and the (i) on the Instrument */
+dialog.set-dlg.wide { width: min(96vw, 980px); }
+.set-models .mpane { display: grid; grid-template-columns: 230px 1fr; gap: 14px; min-height: 0; }
+.set-models .ml { display: grid; gap: 4px; align-content: start; max-height: 66vh; overflow-y: auto; padding: 2px; }
+.ml-item { display: grid; gap: 1px; text-align: left; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 7px 9px; cursor: pointer; }
+.ml-item:hover { border-color: var(--text-3); }
+.ml-item.sel { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber); }
+.ml-name { font-weight: 600; font-size: 13px; }
+.ml-id { font: 11px var(--mono); color: var(--text-3); overflow-wrap: anywhere; }
+.ml-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+.ml-tags i, .mi-badge { font-style: normal; font-size: 10.5px; line-height: 1; padding: 3px 6px; border-radius: 99px; border: 1px solid var(--border); color: var(--text-2); background: var(--surface); }
+.ml-tags i.on, .mi-badge.on { color: var(--good); border-color: var(--good); }
+.ml-tags i.off, .mi-badge.off { color: var(--text-3); border-style: dashed; }
+.set-models .mdive { max-height: 66vh; overflow-y: auto; padding-right: 6px; min-width: 0; }
+dialog.modelbox { width: min(760px, 96vw); max-height: 92vh; padding: 12px 18px 16px; }
+.modelbox .boxhead .uh-id { font: 12px var(--mono); color: var(--amber); overflow-wrap: anywhere; }
+.modelbox .mi-wrap { max-height: calc(92vh - 70px); overflow-y: auto; padding-right: 6px; }
+.mi { font-size: 13.5px; line-height: 1.5; color: var(--text); }
+.mi p { margin: 4px 0; }
+.mi ul { margin: 4px 0; padding-left: 18px; }
+.mi-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 15px; margin-bottom: 6px; }
+.mi-head b { margin-right: 4px; }
+.mi h4 { margin: 14px 0 4px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+.mi-t { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mi-t td { vertical-align: top; padding: 4px 10px 4px 0; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.mi-t td:first-child { width: 34%; color: var(--text-2); }
+.mi-dim { color: var(--text-3); font-size: 12.5px; }
+.mi-t .mi-dim { font-size: 12px; }
+.mi-meter { height: 8px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--border); margin: 8px 0 2px; overflow: hidden; }
+.mi-meter i { display: block; height: 100%; background: var(--amber); }
+.mi-off li b { color: var(--text); }
+.mi-paths summary { cursor: pointer; color: var(--text-2); font-size: 12.5px; margin-top: 6px; }
+.mi-load, .mi-fetch { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; margin: 4px 0; }
+.mi-rev { display: flex !important; align-items: center; gap: 6px !important; font-size: 12.5px; color: var(--text-2); }
+.mi-rev input { width: 110px; font: 12.5px var(--mono); background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px 6px; }
+.mi-status { font-size: 12.5px; color: var(--text-2); flex: 1 1 200px; }
+.mi-fetch .mi-dim { flex: 1 1 240px; }
+.mi-src { margin-top: 14px !important; overflow-wrap: anywhere; }
+@media (max-width: 700px) {
+  .set-models .mpane { grid-template-columns: 1fr; }
+  .set-models .ml { max-height: 30vh; }
+  .set-models .mdive { max-height: none; overflow: visible; }
+  .mi-t td:first-child { width: 40%; }
+}
+.about-head { display: flex; align-items: center; gap: 14px; }
+.about-head h2 { margin: 0; font-size: 19px; }
+dialog h2, dialog h3 { text-transform: none; letter-spacing: normal; color: var(--text); }
+.about-meta { border-collapse: collapse; font-size: 12.5px; margin: 8px 0; }
+.about-meta td { padding: 5px 8px; border-top: 1px solid var(--border); vertical-align: top; line-height: 1.45; }
+.about-meta td:first-child { color: var(--text-3); white-space: nowrap; width: 7em; }
+.about-cite { font-family: Georgia, "Times New Roman", serif; }
+.about-kitmark { display: block; margin-top: 4px; text-align: center; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); text-decoration: none; }
+.about-kitmark:hover { color: var(--accent); text-decoration: underline; }
+/* the boxes' heads */
+.boxhead { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 16px; }
+.boxhead .icon-btn { margin-left: auto; }
+/* Help: a contents list and one topic at a time */
+dialog.helpbox { width: min(1040px, 96vw); height: min(780px, 92vh); max-height: 92vh; padding: 12px 0 0; display: none; flex-direction: column; overflow: hidden; }
+dialog.helpbox[open] { display: flex; }
+.hb-head { padding: 0 14px 10px 18px; margin: 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.hb-links { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; margin-left: 10px; }
+.hb-links a, .hb-more a { color: var(--accent); text-decoration: none; }
+.hb-links a:hover, .hb-more a:hover { text-decoration: underline; }
+.hb { display: grid; grid-template-columns: 250px minmax(0, 1fr); flex: 1; min-height: 0; }
+.hb-side { display: flex; flex-direction: column; gap: 8px; padding: 10px 8px 10px 12px; border-right: 1px solid var(--border); background: var(--surface-2); min-height: 0; }
+.hb-filter { font: inherit; font-size: 13px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 7px; padding: 6px 8px; }
+.hb-select { display: none; }
+.hb-list { overflow-y: auto; flex: 1; min-height: 0; padding: 2px 2px 8px; outline: none; }
+.hb-list:focus-visible { box-shadow: inset 0 0 0 2px var(--accent-soft); border-radius: 6px; }
+.hb-g { margin-bottom: 8px; }
+.hb-g[hidden], .hb-item[hidden] { display: none; }
+.hb-gt { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); padding: 6px 8px 3px; }
+.hb-item { font-size: 13px; padding: 4px 8px 4px 10px; border-radius: 6px; cursor: pointer; color: var(--text-2); border-left: 2px solid transparent; }
+.hb-item:hover { background: var(--surface); color: var(--text); }
+.hb-item.on { background: var(--surface); color: var(--text); font-weight: 600; border-left-color: var(--amber); }
+.hb-list:focus-visible .hb-item.on { outline: 2px solid var(--accent); outline-offset: -2px; }
+.hb-none { font-size: 12.5px; color: var(--text-3); padding: 6px 8px; }
+.hb-topic { overflow-y: auto; padding: 16px 26px 18px; min-height: 0; outline: none; font-size: 14px; line-height: 1.6; }
+.hb-topic header { margin-bottom: 12px; }
+.hb-grp { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--amber); }
+.hb-topic h3 { margin: 2px 0 4px; font-size: 20px; }
+.hb-sum { margin: 0; color: var(--text-2); font-size: 14.5px; }
+.hb-body { max-width: 72ch; }
+.hb-body p { margin: 0 0 10px; }
+.hb-body h4 { margin: 18px 0 6px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+.hb-body ul { margin: 0 0 10px; padding-left: 20px; }
+.hb-body code { font-size: .9em; overflow-wrap: anywhere; }
+dl.hd { margin: 4px 0 12px; display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: 0; border-top: 1px solid var(--border); }
+dl.hd dt, dl.hd dd { margin: 0; padding: 7px 12px 7px 0; border-bottom: 1px solid var(--border); }
+dl.hd dt { font-weight: 600; max-width: 260px; }
+dl.hd dd { color: var(--text-2); }
+.hb-t { width: 100%; border-collapse: collapse; margin: 4px 0 12px; font-size: 13.5px; }
+.hb-t td, .hb-t th { text-align: left; vertical-align: top; padding: 6px 12px 6px 0; border-bottom: 1px solid var(--border); }
+.hb-t th { font-size: 11.5px; color: var(--text-3); font-weight: 600; }
+.hb-finding { margin: 6px 0 12px; padding: 9px 12px; border-left: 3px solid var(--amber); background: var(--surface-2); border-radius: 0 6px 6px 0; font-size: 13.5px; color: var(--text-2); }
+.hb-finding b { color: var(--text); }
+.hb-dim { color: var(--text-3); font-size: 12.5px; }
+.hb-unitintro { color: var(--text-2); font-size: 13.5px; }
+.hb-unitintro a { color: var(--accent); }
+.hb-units { display: grid; gap: 6px; margin: 6px 0 14px; }
+.hb-unit { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.hb-unit > summary { cursor: pointer; padding: 8px 12px; font-size: 13.5px; line-height: 1.45; list-style-position: outside; margin-left: 14px; }
+.hb-unit > summary span { display: block; color: var(--text-2); }
+.hb-unit[open] > summary { border-bottom: 1px solid var(--border); }
+.hb-unit-body { padding: 10px 14px 12px; }
+.hb-unit-body .uh { font-size: 13.5px; line-height: 1.55; }
+.hb-unit-body .uh-what { display: none; }   /* the summary above says it */
+.hb-strip { margin: 0 0 18px; }
+.hb-strip + .hb-strip { border-top: 1px solid var(--border); padding-top: 14px; }
+.hb-strip .uh { font-size: 13.5px; line-height: 1.55; }
+.hb-strip .uh-what { display: none; }   /* the topic's summary says it */
+.hb-strip-t { margin: 0 0 6px; font-size: 15px; }
+.hb-strip-more { margin: 16px 0 6px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+.hb-more { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 14px 0 0; font-size: 13px; }
+.hb-foot { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--border); }
+.hb-foot .b { white-space: normal; text-align: left; max-width: 48%; }
+@media (max-width: 700px) {
+  dialog.helpbox { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; border-radius: 0; }
+  .hb { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  .hb-side { border-right: 0; border-bottom: 1px solid var(--border); padding: 8px 12px; }
+  .hb-filter, .hb-list { display: none; }
+  .hb-select { display: block; font: inherit; font-size: 15px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 7px; padding: 7px 8px; width: 100%; }
+  .hb-topic { padding: 14px 16px 18px; }
+  .hb-links { margin-left: 0; order: 3; width: 100%; }
+  dl.hd { grid-template-columns: 1fr; }
+  dl.hd dt { border-bottom: 0; padding-bottom: 0; max-width: none; }
+}
+/* a unit's help, opened by the (?) on its strip: the manifest, and the unit's explainer (vau's explain.css) in the app's colours */
+dialog.unitbox { width: min(700px, 96vw); max-height: 92vh; padding: 12px 18px 16px; }
+.unitbox .boxhead .uh-id { font: 12px var(--mono); color: var(--amber); }
+.unitbox .uh { max-height: calc(92vh - 70px); overflow-y: auto; padding-right: 6px; font-size: 14px; line-height: 1.55; }
+:is(.unitbox, .hb-unit, .hb-strip) .uh-what { margin: 0 0 10px; font-size: 15px; }
+:is(.unitbox, .hb-unit, .hb-strip) .uh h4 { margin: 16px 0 6px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+:is(.unitbox, .hb-unit, .hb-strip) .uh-dim { color: var(--text-3); font-size: 12.5px; }
+:is(.unitbox, .hb-unit, .hb-strip) .uh-params { width: 100%; font-size: 13px; }
+:is(.unitbox, .hb-unit, .hb-strip) .uh-params td { vertical-align: top; padding: 5px 10px 5px 0; border-bottom: 1px solid var(--border); }
+:is(.unitbox, .hb-unit, .hb-strip) .uh-params th { text-align: left; font-weight: 600; font-size: 11.5px; color: var(--text-3); padding: 0 10px 4px 0; }
+:is(.unitbox, .hb-unit, .hb-strip) .uh-tip { white-space: normal; font-size: 12px; }
+:is(.unitbox, .hb-unit, .hb-strip) .uh-help { max-width: 72ch; }
+:is(.unitbox, .hb-unit, .hb-strip) .vau-explain { max-width: none; margin: 4px 0 10px;
+  --vx-ink: var(--text); --vx-dim: var(--text-2); --vx-bright: var(--text); --vx-line: var(--border); --vx-soft: var(--border);
+  --vx-acc: var(--amber); --vx-acc-soft: color-mix(in srgb, var(--amber) 18%, transparent); --vx-blue: var(--accent); --vx-green: var(--good); --vx-red: var(--critical);
+  --vx-panel: var(--border); --vx-bar: var(--surface-2); --vx-stage: var(--bg); --vx-bg: var(--surface); --vx-mono: var(--mono); }
+:is(.unitbox, .hb-unit, .hb-strip) .vau-explain .vx-cap { font-size: 13px; color: var(--text-2); }
+
+main { max-width: 1480px; margin: 0 auto; padding: 18px; display: grid; gap: 16px; }
+section.view { display: none; gap: 16px; }
+section.view.on { display: grid; }
+/* The Bench fills the window below the bar: the chain is docked at the bottom,
+   the model, prompt and texts scroll above it. Other views scroll as pages. */
+body.dock main { max-width: none; height: calc(100dvh - 52px - 26px); padding: 0; display: block; overflow: hidden; }
+body:not(.dock) main { padding-bottom: 44px; }
+body.dock #v-bench.on { display: flex; flex-direction: column; height: 100%; gap: 0; }
+#benchtop { display: grid; gap: 16px; align-content: start; }
+#benchmid { display: flex; min-height: 0; }
+body.dock #benchmid { flex: 1 1 auto; }
+body.dock #benchtop { flex: 1 1 auto; min-width: 0; min-height: 0; overflow-y: auto; overflow-anchor: none; padding: 14px 18px; }
+body.dock #benchtop > * { width: 100%; max-width: 1444px; margin-left: auto; margin-right: auto; box-sizing: border-box; }
+#arrangement, #session { display: grid; gap: 12px; align-content: start; }
+#arrangement[hidden], #session[hidden] { display: none; }
+#benchdock { display: flex; flex-direction: column; background: var(--surface); }
+body.dock #benchdock { flex: none; height: var(--dock-h, min(500px, 58%)); max-height: calc(100% - 96px); min-height: 0; border-top: 1px solid var(--border); box-shadow: 0 -8px 24px rgba(5,8,20,.10); }
+body.dock #benchdock.folded { height: auto; }
+#benchdock.folded .dockbody { display: none; }
+.dock-handle { flex: none; height: 9px; cursor: ns-resize; position: relative; touch-action: none; }
+.dock-handle::after { content: ""; position: absolute; left: 50%; top: 3px; width: 46px; height: 3px; margin-left: -23px; border-radius: 2px; background: var(--border); }
+.dock-handle:hover::after, .dock-handle:focus-visible::after, .dock-handle.held::after { background: var(--accent); }
+.dock-handle:focus-visible { outline: none; }
+/* the dock's toolbar, left of the Instrument: the chain's view, and tools */
+#benchdock { position: relative; }
+.docktools { flex: none; width: 28px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 2px; }
+.docktools .dt-group { display: flex; flex-direction: column; gap: 2px; padding: 2px; border-radius: 7px; background: var(--surface-2); border: 1px solid var(--border); }
+.docktools button { width: 24px; height: 24px; padding: 0; border: 1px solid transparent; border-radius: 5px; background: none; color: var(--text-2); font: 13px/1 var(--mono); cursor: pointer; display: grid; place-items: center; }
+.docktools button:hover:not(:disabled) { color: var(--accent); border-color: var(--border); background: var(--surface); }
+.docktools button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.docktools button:disabled { opacity: .35; cursor: default; }
+.docktools .dt-group[hidden], .docktools .dt-tools[hidden] { display: none; }
+.docktools .dt-tools { display: flex; flex-direction: column; gap: 2px; }
+/* the texts' toolbar, down the right edge of their card */
+#result { position: relative; padding-right: 54px; }
+.rtools { position: absolute; top: 16px; right: 12px; }
+.docktools .dt-sep { width: 16px; height: 1px; background: var(--border); margin: 3px 0; }
+/* an error in the chain, as a note in the dock's corner */
+#chainstatus.chainok { display: none; }
+#chainstatus.chainbad { position: absolute; right: 22px; bottom: 16px; z-index: 6; max-width: min(60%, 640px); padding: 6px 10px; border-radius: 8px;
+  background: var(--surface); border: 1px solid var(--critical); box-shadow: var(--shadow); font-size: 12px; }
+.dockbody { flex: 1 1 auto; min-height: 0; padding: 0 12px 10px; display: flex; gap: 8px; }
+#deskwrap:not([hidden]) { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+#deskwrap .desk { flex: 1 1 auto; min-height: 0; overflow: auto; box-sizing: border-box; }
+/* one row of strips, all as tall as the tallest (and at least as tall as the desk); the desk scrolls past that */
+#deskwrap .desk { display: grid; grid-auto-flow: column; grid-auto-columns: max-content; grid-template-rows: minmax(min-content, 1fr);   /* the desk's height; taller only if a strip cannot shrink to it */
+  justify-content: start; align-items: stretch; column-gap: 8px; }
+#deskwrap .desk > .strip { box-sizing: border-box; }
+#deskwrap .desk > .addend, #deskwrap .desk > .addgap { align-self: stretch; }
+#deskwrap .desk > .io, #deskwrap .desk > .empty { align-self: center; }
+body.dock #textwrap:not([hidden]) { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+body.dock #chain { flex: 1 1 auto; min-height: 0; resize: none; }
+body.dock #codewrap:not([hidden]) { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+body.dock #codewrap pre.code { flex: 1 1 auto; max-height: none; }
+
+/* ---------------- the Instrument: model, prompt and sampler, first in the dock */
+.instrument { flex: none; width: 272px; box-sizing: border-box; overflow-y: auto; display: flex; flex-direction: column; gap: 7px; padding: 9px 10px;
+  background: #1e2128; color: #e9eaee; border: 1px solid #3a4250; border-radius: 12px; font-size: 12px; --gold: #d9aa3f; --k: #2a2e37; }
+.instrument .ih { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.instrument .ih b { flex: none; white-space: nowrap; font-size: 12.5px; color: #fff; }
+.instrument .iinfo { font: 10px var(--mono); color: #8a8f9b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.instrument .imodel { display: grid; grid-template-columns: 1fr 64px auto auto; gap: 5px; }
+.instrument .iabout { width: 22px; height: 22px; align-self: center; padding: 0; border-radius: 50%; font: italic 700 12px/1 Georgia, serif; }
+.instrument input, .instrument textarea { background: #0f1115; color: #e9eaee; border: 1px solid #2c303a; border-radius: 6px; padding: 4px 6px; font: 11.5px var(--mono); min-width: 0; box-sizing: border-box; }
+.instrument input:focus, .instrument textarea:focus { outline: none; border-color: var(--gold); }
+.instrument textarea { width: 100%; resize: vertical; min-height: 54px; font: 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+.instrument .inote { font-size: 10px; line-height: 1.3; color: #8a8f9b; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.instrument .ib { background: #2a2e37; color: #c9ccd3; border: 1px solid #3a3f4a; border-radius: 6px; font: 600 11px inherit; padding: 3px 8px; cursor: pointer; }
+.instrument .ib:hover { color: var(--gold); border-color: var(--gold); }
+.instrument .iprompt { position: relative; }
+.instrument .iprompt textarea { padding-right: 22px; }
+.instrument .ipick { position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; padding: 0; border: 1px solid #3a3f4a; border-radius: 4px; background: #2a2e37; color: #a7acb8; font-size: 10px; line-height: 1; cursor: pointer; }
+.instrument .ipick:hover, .instrument .ipick[aria-expanded="true"] { color: var(--gold); border-color: var(--gold); }
+.addmenu.pmenu { width: 340px; }
+.addmenu.pmenu button span { -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.addmenu.pmenu button b { font-weight: 500; }
+.instrument .iknobs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+.iknob { cursor: default; padding: 0; gap: 1px; }
+.iknob svg { cursor: ns-resize; border-radius: 50%; }
+.iknob svg:focus-visible { outline: 2px solid var(--gold); }
+.iknob input.num { width: 52px; text-align: center; padding: 2px 2px; font-size: 10.5px; }
+.instrument .iseed { display: flex; align-items: center; gap: 4px; }
+.instrument .iseed span { color: #a7acb8; font-size: 10.5px; margin-right: 2px; }
+.instrument .iseed input { width: 70px; text-align: center; }
+
+/* ---------------- each strip's activity meter */
+/* the activity light, top right of a strip, and its deep dive */
+/* the activity meter: four tiny bars, lit by how much the strip changed what it touched */
+.strip .aled { flex: none; display: inline-flex; align-items: flex-end; gap: 1px; width: 15px; height: 11px; margin-top: 1px; padding: 1px; border-radius: 2px; cursor: help; color: #3ddc84; }
+.strip .aled i { width: 2.5px; border-radius: 1px; background: #3a3f4a; }
+.strip .aled i:nth-child(1) { height: 3px; } .strip .aled i:nth-child(2) { height: 5px; } .strip .aled i:nth-child(3) { height: 7.5px; } .strip .aled i:nth-child(4) { height: 10px; }
+.strip .aled.o { color: #f3a33b; } .strip .aled.r { color: #ff4a24; }
+.strip .aled.n1 i:nth-child(-n+1), .strip .aled.n2 i:nth-child(-n+2), .strip .aled.n3 i:nth-child(-n+3), .strip .aled.n4 i { background: currentColor; }
+.strip .aled.idle i { background: transparent; outline: 1px dashed #3a3f4a; outline-offset: -1px; }
+.strip .aled:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.dive { position: fixed; z-index: 70; width: 252px; padding: 10px 12px; border-radius: 10px; background: #1e2128; color: #e9eaee; border: 1px solid #3a3f4a; box-shadow: 0 14px 36px rgba(0,0,0,.5); font-size: 11.5px; line-height: 1.4; pointer-events: none; }
+.dive[hidden] { display: none; }
+.dive.pinned { pointer-events: auto; border-color: #d9aa3f; z-index: 25; padding-top: 8px; }
+.dive.pinned.inline { position: relative; left: auto; top: auto; z-index: auto; align-self: start; box-shadow: none; box-sizing: border-box; }
+.dive.pinned .dv-x { position: absolute; top: 6px; right: 6px; width: 18px; height: 18px; padding: 0; border: 1px solid #3a3f4a; border-radius: 4px; background: #2a2e37; color: #a7acb8; font-size: 10px; line-height: 1; cursor: pointer; }
+.dive.pinned .dv-x:hover { color: #d9aa3f; border-color: #d9aa3f; }
+.strip .aled { cursor: pointer; }
+.dive b { font-size: 12px; }
+.dive p { margin: 6px 0 0; color: #a7acb8; }
+.dive p.dv-what { color: #e9eaee; font-size: 12px; }
+.dive .dv-big { display: flex; align-items: center; gap: 7px; font: 700 18px var(--mono); margin: 6px 0 4px; }
+.dive .dv-big small { font: 400 11px -apple-system, BlinkMacSystemFont, sans-serif; color: #a7acb8; }
+.dive .dv-dot { width: 10px; height: 10px; border-radius: 50%; background: #2a2e37; border: 1px solid #3a3f4a; }
+.dive .dv-dot.g { background: #3ddc84; border-color: #3ddc84; } .dive .dv-dot.o { background: #f3a33b; border-color: #f3a33b; } .dive .dv-dot.r { background: #ff4a24; border-color: #ff4a24; }
+.dive .dv-chart { width: 100%; height: 54px; display: block; background: #14161b; border-radius: 5px; }
+.dive .dv-chart rect { fill: #4a4f5b; } .dive .dv-chart rect.g { fill: #3ddc84; } .dive .dv-chart rect.o { fill: #f3a33b; } .dive .dv-chart rect.r { fill: #ff4a24; }
+.dive .dv-100, .dive .dv-25 { stroke: #5a606d; stroke-dasharray: 2 3; }
+.dive .dv-ph { stroke: #e9eaee; stroke-width: 1.2; }
+.dive .dv-axis { display: flex; justify-content: space-between; color: #7d8290; font-size: 9.5px; margin-top: 2px; }
+.dive dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 8px 0 0; }
+.dive dt { color: #8a8f9b; } .dive dd { margin: 0; font-family: var(--mono); font-size: 11px; }
+.strip.drop-into { outline: 2px solid var(--gold); outline-offset: 2px; }
+/* the selected strip (the one Delete removes): a thin pale ring just outside it, and its number lit; nothing else changes */
+.strip.sel { outline: 1px solid rgba(233, 234, 238, .55); outline-offset: 2px; }
+.strip.sel .sn { color: #fff; }
+.seg[hidden] { display: none; }
+/* leave one out: how much the text changes without this strip */
+.strip .loo { width: 100%; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px; font: 600 9.5px var(--mono); color: #a7acb8; cursor: help; }
+.strip .loo i { display: block; height: 3px; border-radius: 2px; background: linear-gradient(to right, #ff4a24 calc(var(--v) * 100%), #2a2e37 0); }
+/* the figure */
+dialog.figbox { width: min(1180px, 94vw); max-height: 92vh; padding: 0; }
+dialog.figbox .fighead { padding: 14px 18px 0; margin: 0; }
+dialog.figbox .fighead h2 { margin: 0; }
+dialog.figbox .fighead button { margin-left: auto; }
+dialog.figbox .figprev { padding: 12px 18px; max-height: 70vh; overflow: auto; background: var(--surface-2); }
+dialog.figbox .figprev img { display: block; width: 100%; height: auto; box-shadow: var(--shadow); border-radius: 4px; background: #fff; }
+dialog.figbox .figbar { display: flex; gap: 8px; align-items: center; padding: 12px 18px; flex-wrap: wrap; }
+.strip:focus { outline: none; }
+
+/* ---------------- the timeline: the two texts token by token, and the playhead */
+.timeline { position: sticky; top: 0; z-index: 5; display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; font-size: 11px; outline: none; }
+.timeline:focus-visible { border-color: var(--accent); }
+.timeline .tl-labels { flex: none; width: 70px; display: grid; grid-template-rows: 16px 22px 22px; padding: 4px 0 6px 10px; color: var(--text-3); font-weight: 600; font-size: 10.5px; align-items: center; }
+.timeline .tl-scroll { flex: 1; min-width: 0; overflow-x: auto; padding: 4px 8px 6px 0; }
+.timeline .tl-inner { position: relative; height: 60px; cursor: col-resize; touch-action: none; user-select: none; }
+.timeline .tl-ruler { position: relative; height: 16px; border-bottom: 1px solid var(--border); }
+.timeline .tl-tick { position: absolute; top: 1px; font: 9.5px var(--mono); color: var(--text-3); padding-left: 2px; border-left: 1px solid var(--border); line-height: 13px; }
+.timeline .tl-lane { position: relative; height: 22px; }
+.timeline .tl-c { position: absolute; top: 2px; height: 18px; box-sizing: border-box; padding: 0 2px; font: 10px/18px var(--mono); white-space: nowrap; overflow: hidden; text-overflow: clip; color: var(--text-2); background: var(--surface-2); border-right: 1px solid var(--surface); border-radius: 3px; }
+.timeline .tl-c.blank { background: color-mix(in srgb, var(--surface-2) 60%, transparent); border: 1px dashed color-mix(in srgb, var(--text-3) 45%, transparent); border-left: 0; }
+.timeline .tl-c.blank:first-child { border-left: 1px dashed color-mix(in srgb, var(--text-3) 45%, transparent); }
+.timeline .tl-inner.waiting { cursor: default; }
+.timeline .tl-c.fresh { animation: tlfill .35s ease-out; }
+@keyframes tlfill { from { background: color-mix(in srgb, var(--accent) 45%, var(--surface)); } }
+@media (prefers-reduced-motion: reduce) { .timeline .tl-c.fresh { animation: none; } }
+.timeline .tl-c.diff { background: color-mix(in srgb, #8a8f9b 22%, var(--surface)); color: var(--text); }
+.timeline .tl-c.bent.diff { background: color-mix(in srgb, #d9aa3f 30%, var(--surface)); }
+.timeline .tl-c.on { outline: 1.5px solid var(--text); outline-offset: -1px; z-index: 1; }
+.timeline .tl-div { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px solid #ff4a24; pointer-events: none; }
+.timeline .tl-div span { position: absolute; top: 0; left: 2px; font: 600 9px var(--mono); color: #ff4a24; background: var(--surface); padding: 0 2px; }
+.timeline .tl-ph { position: absolute; top: 0; bottom: 0; pointer-events: none; background: color-mix(in srgb, var(--accent) 14%, transparent); border-left: 2px solid var(--accent); }
+#basetext .tok.ph, #benttext .tok.ph { outline: 2px solid var(--accent); border-radius: 3px; }
+
+/* ---------------- the Session grid */
+.sess-wrap { overflow: auto; max-width: 100%; }
+table.sess { border-collapse: separate; border-spacing: 4px; font-size: 12px; }
+.sess th, .sess td { vertical-align: middle; }
+.sess .sess-empty { color: var(--text-3); padding: 18px 6px; max-width: 60ch; }
+.sess .scol { min-width: 132px; max-width: 180px; text-align: left; font-weight: 600; background: var(--surface-2); border-radius: 8px; padding: 6px 8px; }
+.sess .sname { cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
+.sess .sbtns, .sess .srow { display: flex; gap: 3px; align-items: center; }
+.sess button { background: var(--surface); border: 1px solid var(--border); border-radius: 5px; color: var(--text-2); font-size: 10.5px; padding: 1px 6px; cursor: pointer; }
+.sess button:hover { color: var(--accent); border-color: var(--accent); }
+.sess .srow { background: var(--surface-2); border-radius: 8px; padding: 6px 8px; min-width: 200px; max-width: 280px; font-weight: 500; }
+.sess .sprompt { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.sess td.cell { width: 132px; height: 46px; border-radius: 8px; text-align: center; border: 1px solid var(--border); background: var(--surface); }
+.sess td.cell.empty .cellrun { width: 30px; height: 24px; font-size: 12px; }
+.sess td.cell.done { cursor: pointer; background: color-mix(in srgb, #d9aa3f var(--d), var(--surface)); }
+.sess td.cell.done b { display: block; font: 600 13px var(--mono); }
+.sess td.cell.done span, .sess td.cell.done em { display: block; font-size: 10px; color: var(--text-2); font-style: normal; }
+.sess td.cell.done:hover { outline: 2px solid var(--accent); }
+.sess td.cell.err { color: #c0392b; cursor: pointer; }
+.sess td.cell.queued { color: var(--text-3); }
+.sess .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: #3ddc84; border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------------- the browser, foldable to a rail */
+#browser { flex: none; width: 232px; display: flex; flex-direction: column; background: var(--surface); border-right: 1px solid var(--border); min-height: 0; position: relative; }
+body:not(.dock) #browser { display: none; }
+#browser .br-head { flex: none; display: flex; gap: 6px; padding: 10px 8px 8px 10px; }
+#browser .br-head input { flex: 1; min-width: 0; font-size: 12px; padding: 5px 8px; }
+#browser .br-fold, #browser .br-rail { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text-2); cursor: pointer; font-size: 11px; padding: 0 7px; }
+#browser .br-rail { display: none; }
+#browser .br-body { flex: 1; min-height: 0; overflow-y: auto; padding: 0 6px 12px; font-size: 12.5px; }
+#browser details { margin-bottom: 4px; }
+#browser summary { cursor: pointer; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-2); padding: 5px 4px; }
+#browser .br-item { display: flex; align-items: center; gap: 4px; padding: 3px 6px 3px 14px; border-radius: 5px; cursor: grab; }
+#browser .br-item:hover, #browser .br-item:focus-visible { background: var(--surface-2); outline: none; }
+#browser .br-units { display: flex; align-items: center; gap: 6px; padding: 2px 6px 4px 14px; font-size: 11px; }
+#browser .br-units button { font-size: 11px; padding: 1px 6px; }
+#browser .br-sub { padding: 6px 6px 2px 14px; font-size: 10px; font-weight: 650; letter-spacing: .06em; color: var(--text-3); }   /* a collection, within VAUs */
+#browser .br-item .meterbadge { margin-left: 2px; }
+#browser .br-cat { padding: 4px 6px 1px 22px; font-size: 9.5px; letter-spacing: .05em; color: var(--text-3); opacity: .8; }   /* a category, within a collection */
+.vspace { display: inline-block; margin-left: 4px; padding: 0 3px; border-radius: 3px; font: 500 8.5px/12px var(--mono); color: var(--text-3); background: color-mix(in srgb, var(--text-3) 14%, transparent); vertical-align: 1px; }   /* where a unit acts */
+#browser .br-item .vspace { margin-left: auto; }
+.addmenu .vspace { color: #8a8f9b; background: rgba(138, 143, 155, .16); font-weight: 400; }
+#browser .br-uerr { color: var(--critical); cursor: help; }
+#browser .br-ext { color: var(--accent); font-size: 9px; }
+.strip.ext .st::after { content: " ◆"; color: var(--accent); font-size: 8px; }
+.dive .dv-unit { color: var(--text-3); font-size: 11px; }
+#browser .br-item .br-l { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#browser .br-x { display: none; gap: 2px; }
+#browser .br-item:hover .br-x, #browser .br-item:focus-within .br-x { display: inline-flex; }
+#browser .br-x button { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; font-size: 10px; color: var(--text-2); cursor: pointer; padding: 0 4px; }
+#browser .br-none { color: var(--text-3); padding: 2px 14px; font-size: 11.5px; }
+#browser .br-save { margin: 4px 0 4px 10px; background: none; border: 1px dashed var(--border); border-radius: 5px; color: var(--text-2); font-size: 11.5px; padding: 2px 8px; cursor: pointer; }
+#browser.folded { width: 24px; }
+#browser.folded .br-head, #browser.folded .br-body { display: none; }
+#browser.folded .br-rail { display: block; position: absolute; inset: 8px 3px auto 3px; height: 28px; padding: 0; }
+
+/* ---------------- the info bar */
+.icotip.math { font-family: var(--mono); font-size: 11.5px; white-space: nowrap; max-width: none; }
+.icotip { position: fixed; z-index: 80; max-width: 280px; padding: 5px 9px; border-radius: 6px; background: #14161b; color: #e9eaee; border: 1px solid #3a3f4a;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35); font-size: 12px; line-height: 1.35; pointer-events: none; }
+.icotip.mini { font-size: 10.5px; line-height: 1.3; padding: 2px 6px; border-radius: 4px; white-space: nowrap; max-width: none; opacity: .92; }
+.icotip[hidden] { display: none; }
+.infobar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; height: 26px; box-sizing: border-box; display: flex; align-items: center; gap: 16px; padding: 0 14px;
+  background: var(--ink-1); color: var(--s-text-2); font-size: 12px; border-top: 1px solid rgba(255,255,255,.06); }
+.infobar #infotext { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.infobar #infostatus { flex: none; max-width: 45%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--s-text-3); }
+.infobar #infostatus.busy { color: #3ddc84; }
+body:not(.dock) .viewswap, .viewswap[hidden] { display: none; }
+.viewswap .tp[aria-pressed="true"] { background: rgba(255,255,255,.16); color: #fff; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px 22px; box-shadow: var(--shadow); min-width: 0; }
+h2 { font-size: 12px; font-weight: 650; text-transform: uppercase; letter-spacing: .08em; color: var(--text-2); margin: 0 0 14px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+h2 .step { color: var(--accent); }
+h2 .aside { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 13px; color: var(--text-3); }
+h3 { font-size: 13px; margin: 14px 0 8px; color: var(--text-2); font-weight: 650; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+.f { display: grid; gap: 5px; font-size: 13px; color: var(--text-2); font-weight: 500; min-width: 0; align-content: start; }
+.f .hint { font-weight: 400; color: var(--text-3); font-size: 12px; }
+input, select, textarea { font: inherit; font-size: 14px; color: var(--text); background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 7px 10px; min-width: 0; }
+input[type=checkbox] { width: auto; }
+input:focus, select:focus, textarea:focus { outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: 0; border-color: var(--accent); }
+textarea { font-family: var(--mono); font-size: 13px; line-height: 1.55; resize: vertical; width: 100%; }
+#prompt { font-family: inherit; font-size: 15px; }
+.num { width: 86px; }
+.b { display: inline-block; text-decoration: none; font: inherit; font-size: 13.5px; font-weight: 550; color: var(--text); background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 7px 14px; cursor: pointer; white-space: nowrap; }
+.b:hover:not(:disabled) { border-color: color-mix(in srgb, var(--accent) 50%, var(--border)); }
+.b:disabled { color: var(--text-3); cursor: default; }
+.b.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.b.small { padding: 3px 9px; font-size: 12.5px; }
+.b.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; background: var(--surface-2); font: inherit; font-size: 12.5px; padding: 4px 11px; cursor: pointer; color: var(--text-2); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.chk { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--text-2); }
+.chainok { font-size: 12.5px; color: var(--good); }
+.chainbad { font-size: 12.5px; color: var(--critical); overflow-wrap: anywhere; }
+.err { color: var(--critical); font-size: 13px; white-space: pre-wrap; }
+.note { font-size: 12.5px; color: var(--text-3); }
+.pill { display: inline-block; font-size: 11.5px; padding: 1px 8px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2); }
+.pill.in { background: color-mix(in srgb, var(--text-3) 15%, transparent); }
+.pill.out { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); color: var(--text); }
+.pill.warn { background: color-mix(in srgb, var(--critical) 15%, transparent); border-color: color-mix(in srgb, var(--critical) 40%, var(--border)); }
+pre.code { font-family: var(--mono); font-size: 12px; line-height: 1.5; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; overflow: auto; max-height: 460px; margin: 0; white-space: pre; }
+table.t { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.t th { text-align: left; font-weight: 600; color: var(--text-2); font-size: 12px; border-bottom: 1px solid var(--border); padding: 6px 8px 6px 0; }
+table.t td { border-bottom: 1px solid var(--border); padding: 6px 8px 6px 0; vertical-align: top; }
+table.t td.n { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+.progress { height: 4px; background: var(--surface-2); border-radius: 2px; overflow: hidden; }
+.progress i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+
+/* ---------------- the desk (Video Kintsugi) */
+.desk { display: flex; gap: 8px; align-items: stretch; overflow-x: auto; padding: 14px; border-radius: 14px;
+  background: #14161b; border: 1px solid #262a33; --gold: #d9aa3f; --k: #2a2e37; color: #e9eaee; min-height: 120px; }
+#sweepbox { position: fixed; z-index: 40; right: 16px; bottom: calc(var(--dockh, 360px) + 12px); max-width: min(760px, calc(100vw - 32px)); max-height: 60vh; overflow: auto; padding: 10px 12px; border-radius: 10px; background: #15171c; color: #d9dbe0; border: 1px solid #2a2e37; box-shadow: 0 8px 28px rgba(0,0,0,.4); font-size: 11.5px; }
+#sweepbox .sw-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+#sweepbox .sw-head b { flex: 1; }
+#sweepbox .sw-head button { font-size: 11px; }
+#sweepbox .sw-note { color: #8a8f9b; margin: 0 0 6px; }
+#sweepbox table { border-collapse: separate; border-spacing: 2px; }
+#sweepbox td, #sweepbox th { padding: 0; font: 9.5px var(--mono); color: #8a8f9b; text-align: center; }
+#sweepbox td.c { width: 30px; height: 20px; border-radius: 3px; cursor: pointer; color: #0e0f12; font-weight: 600; }
+#sweepbox td.c:hover { outline: 2px solid #e9eaee; }
+#sweepbox td.c.cur { outline: 2px solid var(--gold); }
+#sweepbox .sw-seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.desk .master { align-self: stretch; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 38px; padding: 4px 0; border-radius: 8px; cursor: help; outline: none; }
+.desk .master:focus-visible, .desk .master:hover { background: rgba(255,255,255,.04); }
+.desk .master .mh { font-size: 9px; letter-spacing: .25em; color: #6f7480; font-weight: 700; padding-left: .25em; }
+.desk .master .mm { position: relative; flex: 1 1 0; min-height: 48px; width: 10px; border-radius: 3px; background: #1b1e25; box-shadow: inset 0 0 0 1px #2a2e37; overflow: hidden; }
+.desk .master .mo { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: #3a3f4a; transition: height .12s; }
+.desk .master .mo.g { background: #3ddc84; } .desk .master .mo.o { background: #f3a33b; } .desk .master .mo.r { background: #ff4a24; }
+.desk .master .ms { position: absolute; left: 0; right: 0; height: 2px; margin-bottom: -1px; background: #e9eaee; }
+.desk .master .mp { position: absolute; left: 0; right: 0; height: 1px; background: #ff4a24; }
+.desk .master .mi { font: 600 10.5px var(--mono); color: #c9ccd3; white-space: nowrap; }
+.desk .master.live .mi { color: #f2f3f5; }
+.desk .master .mu { font-size: 8.5px; letter-spacing: .08em; color: #6f7480; }
+.dive table.dv-loud { border-collapse: collapse; font-size: 11px; margin: 4px 0; }
+.dive table.dv-loud td, .dive table.dv-loud th { padding: 1px 6px 1px 0; text-align: left; font-weight: normal; }
+.dive table.dv-loud th { color: var(--text-3); }
+.desk .io { writing-mode: vertical-rl; transform: rotate(180deg); align-self: center; font-size: 10.5px; letter-spacing: .3em; color: #6f7480; font-weight: 700; }
+.desk .empty { align-self: center; color: #8a8f9b; font-size: 13px; padding: 20px; max-width: 360px; }
+.strip { --spx: 8px; --spb: 8px; position: relative; flex: none; width: 132px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px var(--spx) var(--spb); background: #1e2128; border: 1px solid #2c303a; border-radius: 10px; }   /* --spx, --spb: the side and foot padding, which a unit's card reaches past */
+.strip.sampler { background: #1b2026; border-style: dashed; border-color: #3d4656; }
+.strip.off > :not(.sh):not(.sf) { opacity: .38; }
+.strip .sh { display: flex; width: 100%; align-items: center; gap: 4px; min-height: 14px; }
+.strip .sn { flex: none; font: 600 9px var(--mono); color: #7d8290; padding: 0 1px; }
+.strip .sh { cursor: grab; touch-action: none; user-select: none; }
+.strip .grip { border-radius: 4px; }
+.strip .grip:hover, .strip .grip:focus-visible { color: #e9eaee; outline: 1px solid #5a606d; }
+.strip.dragging { z-index: 2; cursor: grabbing; box-shadow: 0 10px 28px rgba(0,0,0,.55); border-color: var(--gold); opacity: .95; }
+.desk.dragging, .desk.dragging .sh, .desk.dragging .st { cursor: grabbing; }
+.strip.drop-before::before, .strip.drop-after::after { content: ""; position: absolute; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--gold); box-shadow: 0 0 8px rgba(217,170,63,.6); }
+.strip.drop-before::before { left: -6px; }
+.strip.drop-after::after { right: -6px; }
+/* the + buttons: one after the last strip, and one in each gap between strips that shows on hover */
+.desk .addgap { flex: none; position: relative; z-index: 1; width: 16px; margin: 0 -12px; padding: 0; border: 0; background: none; cursor: pointer; }
+.desk .addgap::before { content: ""; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 2px; border-radius: 1px; background: var(--gold); opacity: 0; transition: opacity .12s; }
+.desk .addgap .plus { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 22px; height: 22px; border-radius: 50%;
+  display: grid; place-items: center; background: #1e2128; border: 1px solid var(--gold); color: var(--gold); font: 600 15px/1 var(--mono); opacity: 0; transition: opacity .12s; }
+.desk .addgap:hover::before, .desk .addgap:focus-visible::before, .desk .addgap[aria-expanded="true"]::before { opacity: .55; }
+.desk .addgap:hover .plus, .desk .addgap:focus-visible .plus, .desk .addgap[aria-expanded="true"] .plus { opacity: 1; }
+.desk .addgap:focus-visible { outline: none; }
+.desk.dragging .addgap { pointer-events: none; }
+.desk .addend { flex: none; width: 34px; border: 1px dashed #3a3f4a; border-radius: 10px; background: transparent; color: #8a8f9b; font: 400 22px/1 var(--mono); cursor: pointer; display: grid; place-items: center; }
+.desk .addend:hover, .desk .addend:focus-visible { color: var(--gold); border-color: var(--gold); background: rgba(217,170,63,.06); outline: none; }
+.strip.fresh { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 0 16px rgba(217,170,63,.35); transition: box-shadow .4s, border-color .4s; }
+.addmenu { position: fixed; z-index: 60; width: 300px; max-height: min(70vh, 520px); overflow-y: auto; padding: 6px; border-radius: 10px;
+  background: #1e2128; color: #e9eaee; border: 1px solid #3a3f4a; box-shadow: 0 14px 36px rgba(0,0,0,.5); font-size: 12.5px; }
+.addmenu .am-where { padding: 4px 8px 6px; color: #8a8f9b; font-size: 11.5px; }
+.addmenu .am-h { padding: 8px 8px 3px; color: var(--gold, #d9aa3f); font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.addmenu .am-cat { padding: 3px 8px 1px 14px; color: #6f7480; font-size: 9.5px; letter-spacing: .05em; }
+.addmenu .am-sub { padding: 4px 8px 2px; color: #8a8f9b; font-size: 10px; font-weight: 650; letter-spacing: .06em; }   /* a collection, within VAUs */
+.addmenu button { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: 6px; padding: 6px 8px; color: inherit; font: inherit; cursor: pointer; }
+.addmenu button b { display: block; font-weight: 600; }
+.addmenu button span { display: block; color: #9a9fab; font-size: 11.5px; line-height: 1.35; }
+.addmenu button:hover, .addmenu button:focus-visible { background: rgba(217,170,63,.14); outline: none; }
+.strip .tgt { display: flex; flex-direction: column; gap: 4px; }
+.strip details.hostfx { margin-top: 2px; border-top: 1px solid #2a2e37; padding-top: 2px; }
+.strip details.hostfx > summary { cursor: pointer; font-size: 10px; letter-spacing: .06em; color: var(--vu-faint, #8a8f9b); list-style: none; padding: 1px 2px; }
+.strip details.hostfx > summary::before { content: "▸ "; font-size: 8px; }
+.strip details.hostfx[open] > summary::before { content: "▾ "; }
+.strip details.hostfx > summary i { font-style: normal; color: var(--gold); }
+.strip .krow { display: flex; justify-content: center; gap: 2px; }
+.strip .krow .knob { padding: 0 2px; }
+/* a short desk: knobs and gaps shrink a step, then another */
+.desk.compact .strip { gap: 4px; --spx: 7px; --spb: 6px; padding: 8px var(--spx) var(--spb); }
+.desk.compact .knob svg { width: 34px; height: 34px; }
+.desk.compact .knob .kl, .desk.compact .strip .f > span { font-size: 9.5px; }
+.desk.tight .strip { gap: 3px; --spx: 6px; --spb: 5px; padding: 6px var(--spx) var(--spb); }
+/* A unit's top bar as glass with the unit's own colour behind it (its tint, from its collection's interface, VAU SPEC 5d):
+   the colour seeps up from the card, deepest at the bar's foot, under a bright edge and a sheen on the upper half. The bar
+   reaches the strip's top and sides; its own top padding stands in for the strip's. */
+.strip.tinted { --spt: 10px; }
+.desk.compact .strip.tinted { --spt: 8px; }
+.desk.tight .strip.tinted { --spt: 6px; }
+.strip.tinted, .desk.compact .strip.tinted, .desk.tight .strip.tinted { padding-top: 0; row-gap: 0; }   /* the bar sits straight on the card */
+.strip.tinted > .sh { position: relative; z-index: 1; box-sizing: border-box; width: calc(100% + 2 * var(--spx)); margin: 0 calc(-1 * var(--spx));
+  padding: var(--spt) var(--spx) 5px; border-radius: 9px 9px 0 0; color: #fff;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .20) 0%, rgba(255, 255, 255, .06) 46%, rgba(255, 255, 255, 0) 54%),
+    radial-gradient(120% 90% at 50% 120%, color-mix(in srgb, var(--vu-tint) 75%, transparent) 0%, transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, var(--vu-tint) 26%, transparent), color-mix(in srgb, var(--vu-tint) 55%, transparent));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .42), inset 1px 0 0 rgba(255, 255, 255, .10), inset -1px 0 0 rgba(255, 255, 255, .06),
+    inset 0 -1px 0 color-mix(in srgb, var(--vu-tint) 60%, white 40%);
+  -webkit-backdrop-filter: blur(8px) saturate(1.8); backdrop-filter: blur(8px) saturate(1.8); }
+.strip.tinted > .sh .sn { color: rgba(255, 255, 255, .72); }
+.strip.tinted > .sh .qhelp { border-color: rgba(255, 255, 255, .45); color: rgba(255, 255, 255, .85); }
+.desk.tight .knob svg { width: 28px; height: 28px; }
+.desk.tight .fwell { min-height: 44px; }
+.strip .tknobs { display: flex; justify-content: center; gap: 2px; }
+.strip .tknobs .knob { padding: 0 2px; }
+.strip .tknobs .rawargs { width: 100%; }
+.strip .led { flex: none; width: 10px; height: 10px; border-radius: 50%; border: 1px solid #4a4f5b; background: #2a2e37; cursor: pointer; padding: 0; }
+.strip .led[aria-pressed="true"] { background: #f3a33b; border-color: #f3a33b; box-shadow: 0 0 8px rgba(243,163,59,.6); }
+.strip .st { flex: 1; min-width: 0; display: flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 650; line-height: 1.2; }   /* the name on one line (desk.js fitNames sets a long one smaller) */
+.strip .stn { flex: 0 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.01em; }
+.strip .stn.two { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.05; hyphens: auto; overflow-wrap: anywhere; }
+.strip .stn.two.words { overflow-wrap: normal; hyphens: manual; }   /* fitNames' measure: words kept whole */
+/* the Lens's own compact strips (100px): the top bar gives the name all it can */
+.strip:not(.vau-strip) > .sh { gap: 2px; }
+.strip:not(.vau-strip) > .sh .led { width: 8px; height: 8px; }
+.strip:not(.vau-strip) > .sh .st { gap: 2px; }
+.strip:not(.vau-strip) > .sh .aled { width: 11px; height: 9px; padding: 0; }
+.strip .qhelp { flex: none; display: inline-block; width: 11px; height: 11px; margin: 0; padding: 0; border-radius: 50%; border: 1px solid #4a4f5b; background: transparent; color: #9aa0ad; font: 700 7.5px/9px var(--mono); cursor: help; }   /* a unit's help (boxes.js), at the end of the title */
+.meterbadge { display: inline-block; vertical-align: .2em; margin-left: 6px; padding: 0 4px; border: 1px solid currentColor; border-radius: 3px; color: var(--text-3); font: 700 9.5px/14px var(--mono); letter-spacing: .07em; text-transform: uppercase; }   /* a meter: Help, unit help, and (below) the strip */
+.strip .meterbadge { flex: none; display: inline-block; padding: 0 3px; border: 1px solid #4a4f5b; border-radius: 2px; color: #8a8f9b; font: 700 7.5px/10px var(--mono); letter-spacing: .06em; text-transform: uppercase; }   /* meters: they read and change nothing */
+.strip .qhelp:hover { color: #e9eaee; border-color: #8a8f9b; }
+.strip .qhelp:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+.strip .sw { font-size: 10.5px; color: #8a8f9b; text-align: center; line-height: 1.25; min-height: 26px; }
+.vpre { font-style: normal; font-weight: 500; font-size: .82em; opacity: .7; margin-right: .03em; }   /* a collection's prefix before a unit's name: the Core Collection's small v */
+.dive .dv-sum { margin: 2px 0 6px; font-size: 12px; } .dive .dv-sum span { color: #9aa0ad; } .dive .dv-sum b { font-family: var(--mono); }   /* a unit's suggested summary (VAU SPEC 5e) */
+.strip .sk { display: flex; flex-direction: column; align-items: stretch; gap: 5px; flex: none; width: 100%; }
+/* a unit's card: everything below the strip's top line, to its left, right and bottom edges, for its controls or a meter's screen, in
+   its collection's look (vau/look/<collection>.css, SPEC 5d). The strip's frame and top line (power, number, name, help, activity) stay
+   the desk's. Without a look the card is invisible and the strip looks as it always has. */
+.strip .vau-card { flex: 1 1 auto; min-height: 0; align-self: stretch; margin: 0 calc(-1 * var(--spx)) calc(-1 * var(--spb));
+  padding: var(--vu-card-pad, 0 var(--spx) var(--spb)); background: var(--vu-bg, none); border-top: 1px solid var(--vu-border, transparent); border-radius: 0 0 9px 9px; }   /* inside: VAU's card.css */
+.strip .badge { font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em; color: #9fb4d9; text-align: center; border: 1px solid #3d4656; border-radius: 4px; padding: 1px 0; }
+.strip .tgt { display: grid; grid-template-columns: 1fr; gap: 3px; }
+.strip .sl { display: grid; gap: 2px; font-size: 10.5px; color: var(--vu-dim, #a7acb8); text-transform: var(--vu-label-case, none); letter-spacing: var(--vu-label-spacing, normal); font-weight: var(--vu-label-weight, normal); }
+.strip .sel, .strip .rawargs { font: var(--vu-field-size, 11px) var(--vu-field-font, var(--mono)); background: var(--vu-field, var(--k)); color: var(--vu-ink, #e9eaee); border: 1px solid var(--vu-field-edge, #3a3f4a); border-radius: 6px; padding: 4px 5px; width: 100%; }
+.knob { display: grid; justify-items: center; cursor: ns-resize; touch-action: none; user-select: none; border-radius: 8px; padding: 2px 4px; }
+.knob:focus-visible { outline: var(--vu-focus, 2px solid var(--gold)); }
+.knob svg { width: 42px; height: 42px; background: var(--vu-knob-face, none); filter: var(--vu-knob-filter, none); }
+.knob .kbody { fill: var(--vu-knob-body, var(--k)); stroke: var(--vu-knob-edge, #3a3f4a); stroke-width: var(--vu-knob-edge-width, 1); stroke-dasharray: var(--vu-knob-flutes, none); }
+.knob .ktrack { fill: none; stroke: var(--vu-knob-track, #2f333d); stroke-width: var(--vu-knob-track-width, 3); stroke-dasharray: var(--vu-knob-dots, none); stroke-linecap: round; }
+.knob .karc { fill: none; stroke: var(--vu-knob-arc, var(--gold)); stroke-width: 3; stroke-linecap: round; }
+.knob .kline { stroke: var(--vu-knob-pointer, #e9eaee); stroke-width: 2.5; stroke-linecap: round; }
+.knob .kl { font-size: 10.5px; color: var(--vu-dim, #a7acb8); text-transform: var(--vu-label-case, none); letter-spacing: var(--vu-label-spacing, normal); font-weight: var(--vu-label-weight, normal); }
+.knob .kv { font: 500 11px var(--vu-value-font, var(--mono)); color: var(--vu-ink, #e9eaee); margin-top: -2px; }
+.tg { display: inline-flex; align-items: center; gap: 6px; font-size: var(--vu-field-size, 11px); color: var(--vu-ink, #c9ccd4); background: var(--vu-field, var(--k)); border: 1px solid var(--vu-field-edge, #3a3f4a); border-radius: 6px; padding: 3px 8px; cursor: pointer; }
+.tg i { width: 8px; height: 8px; border-radius: 50%; background: var(--vu-led, #444955); }
+.tg[aria-pressed="true"] i { background: var(--vu-led-on, var(--gold)); box-shadow: var(--vu-led-on-shadow, 0 0 6px var(--gold)); }
+.fader { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 4px; flex: 1 1 auto; min-height: 0; }   /* the fader takes the strip's spare height */
+.fader .fv { font: 500 11px var(--vu-value-font, var(--mono)); color: var(--vu-fader-value, var(--gold)); min-height: 15px; cursor: text; }
+.fader .fl { font-size: 10.5px; color: var(--vu-dim, #a7acb8); text-transform: var(--vu-label-case, none); letter-spacing: var(--vu-label-spacing, normal); font-weight: var(--vu-label-weight, normal); }
+.fwell { position: relative; flex: 1 1 0; min-height: 56px; max-height: 200px; width: 34px; display: grid; place-items: center; border-radius: 6px; background: repeating-linear-gradient(to bottom, transparent 0 13px, var(--vu-fader-rule, #2f333d) 13px 14px); }
+.fader input[type=range] { position: absolute; top: 0; bottom: 0; left: 0; writing-mode: vertical-lr; direction: rtl; appearance: none; -webkit-appearance: none; width: 34px; height: 100%;   /* out of the well's own sizing */ background: transparent; margin: 0; cursor: ns-resize; border: 0; padding: 0; }
+.fader input[type=range]::-webkit-slider-runnable-track { width: 4px; background: var(--vu-fader-slot, #0d0f13); border-radius: 2px; border: 1px solid var(--vu-fader-slot-edge, #343843); }
+.fader input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 16px; border-radius: 3px; background: var(--vu-fader-cap, #d7d9de); border: 1px solid #0d0f13; box-shadow: inset 0 -3px 0 var(--vu-fader-cap-shade, #a9adb6), inset 0 2px 0 var(--vu-fader-cap-light, #fff); margin-left: -14px; }
+.nofader { flex: 1 1 0; min-height: 0; }
+/* meters: wider strips with a screen */
+.strip.probe { width: 214px; background: #191c22; border-color: #33404a; }
+.strip.probe .badge { color: #8fd0c0; border-color: #33504a; }
+.strip .screen { flex: none; width: 100%; box-sizing: border-box; background: var(--vu-screen, #0f1115); border: var(--vu-screen-edge-width, 1px) solid var(--vu-screen-edge, #2a2e37); border-radius: var(--vu-screen-radius, 6px); box-shadow: var(--vu-screen-shadow, none); filter: var(--vu-screen-filter, none); text-shadow: none; padding: 6px; font-size: 10.5px; line-height: 1.3; display: flex; flex-direction: column; gap: 6px; }
+.screen .pempty { color: var(--vu-screen-dim, #6f7480); text-align: center; padding: 10px 0; }
+.screen .pnav { display: flex; align-items: center; justify-content: space-between; color: var(--vu-screen-ink, #c9ccd3); font: 600 10.5px var(--mono); }
+.screen .pnav button { background: none; border: 1px solid var(--vu-screen-rule, #2c303a); color: var(--vu-screen-dim, #9a9fab); border-radius: 4px; cursor: pointer; font-size: 9px; padding: 1px 6px; }
+.screen .pnav button:hover { color: var(--vu-screen-hot, var(--gold)); border-color: var(--vu-screen-hot, var(--gold)); }
+.screen .ph { font-weight: 650; color: var(--vu-screen-ink, #c9ccd3); display: flex; justify-content: space-between; gap: 6px; margin-bottom: 2px; }
+.screen .ph span { font: 400 10px var(--mono); color: var(--vu-screen-dim, #8a8f9b); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.screen .pside.bent .ph { color: var(--vu-screen-hot, var(--gold)); }
+.screen .pr { display: grid; grid-template-columns: 72px 1fr 34px; gap: 5px; align-items: center; }
+.screen .pr .pt { font-family: var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--vu-screen-ink, #c9ccd3); }
+.screen .pr .pt sub { color: var(--vu-screen-dim, #6f7480); font-size: 8px; margin-left: 2px; }
+.screen .pr.hot .pt { color: var(--vu-screen-ink, #fff); font-weight: 700; }
+.screen .pr .pb { position: relative; height: 6px; background: var(--vu-screen-track, #20242c); border-radius: 3px; overflow: hidden; }
+.screen .pr .pb i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--vu-screen-bar, #8a8f9b); border-radius: 3px; }
+.screen .pside.bent .pr .pb i { background: var(--vu-screen-hot, var(--gold)); }
+.screen .pb.centre::after { content: ""; position: absolute; left: 50%; top: -1px; bottom: -1px; width: 1px; background: var(--vu-screen-rule, #5a606d); }
+.screen .pr .pv { font-family: var(--mono); text-align: right; color: var(--vu-screen-dim, #9a9fab); }
+.screen .pnote { color: var(--vu-screen-dim, #7d8290); font-size: 9.5px; }
+/* a meter that reads one number per step, as needles on a scale: shown only where a unit's look asks (SPEC 5d) */
+.screen .needle { display: var(--vu-meter-needle, none); }
+.screen .psp .spark { width: 100%; height: 34px; display: block; cursor: pointer; }
+
+/* ---------------- the Lens's own strips: a compact device, inspired by Ableton's. Flat knobs with no body, tiny labels and values,
+   a slim fader and tight spacing (the top bar is the desk's, the same on every strip), so a strip packs its controls into little room. A unit's strip (.vau-strip) keeps its frame and top
+   line at the desk's usual size and its card in its collection's look (vau/look/<collection>.css), so the two read differently. */
+.strip:not(.vau-strip) { --spx: 5px; --spb: 5px; width: 100px; gap: 3px; padding: 6px var(--spx) var(--spb); border-radius: 6px; }
+.strip.probe:not(.vau-strip) { width: 176px; }
+.strip:not(.vau-strip) .sk { gap: 3px; }
+.strip:not(.vau-strip) .tgt { gap: 2px; }
+.strip:not(.vau-strip) .sl { gap: 1px; font-size: 8.5px; color: #8a8f9b; }
+.strip:not(.vau-strip) .sel, .strip:not(.vau-strip) .rawargs { font-size: 9.5px; padding: 1px 3px; border-radius: 3px; }
+.strip:not(.vau-strip) .sw { font-size: 9px; min-height: 0; }
+.strip:not(.vau-strip) .badge { font-size: 8px; padding: 0; border-radius: 3px; }
+.strip:not(.vau-strip) .loo { font-size: 8.5px; gap: 4px; }
+.strip:not(.vau-strip) .tg { font-size: 9.5px; gap: 4px; padding: 1px 5px; border-radius: 3px; }
+.strip:not(.vau-strip) .tg i { width: 6px; height: 6px; }
+.strip:not(.vau-strip) details.hostfx { margin-top: 1px; }
+.strip:not(.vau-strip) details.hostfx > summary { font-size: 8.5px; }
+.strip:not(.vau-strip) .krow, .strip:not(.vau-strip) .tknobs { gap: 0; }
+.strip:not(.vau-strip) .knob { padding: 0 1px; border-radius: 4px; }
+.strip:not(.vau-strip) .knob svg { width: 30px; height: 30px; }
+.strip:not(.vau-strip) .knob .kbody { fill: none; stroke: none; }                  /* no body: an arc and a pointer */
+.strip:not(.vau-strip) .knob .ktrack { stroke: #3a3f4a; stroke-width: 3.5; stroke-linecap: butt; }
+.strip:not(.vau-strip) .knob .karc { stroke-width: 3.5; stroke-linecap: butt; }
+.strip:not(.vau-strip) .knob .kline { stroke-width: 3; }
+.strip:not(.vau-strip) .knob .kl { font-size: 8.5px; color: #8a8f9b; line-height: 1.1; }
+.strip:not(.vau-strip) .knob .kv { font-size: 9px; margin-top: -1px; }
+.strip:not(.vau-strip) .fader { gap: 2px; margin-top: 2px; }
+.strip:not(.vau-strip) .fader .fv { font-size: 9px; min-height: 12px; }
+.strip:not(.vau-strip) .fader .fl { font-size: 8.5px; color: #8a8f9b; }
+.strip:not(.vau-strip) .fwell { width: 24px; min-height: 44px; border-radius: 3px; background: repeating-linear-gradient(to bottom, transparent 0 9px, #2a2e37 9px 10px); }
+.strip:not(.vau-strip) .fader input[type=range] { width: 24px; }
+.strip:not(.vau-strip) .fader input[type=range]::-webkit-slider-runnable-track { width: 3px; border-radius: 1px; }
+.strip:not(.vau-strip) .fader input[type=range]::-webkit-slider-thumb { width: 20px; height: 10px; margin-left: -9px; border-radius: 2px; background: #c9ccd3; box-shadow: inset 0 -1px 0 #9aa0ad; }
+.strip:not(.vau-strip) .screen { padding: 4px; gap: 4px; font-size: 9px; border-radius: 3px; }
+.strip:not(.vau-strip) .screen .pnav { font-size: 9px; }
+.strip:not(.vau-strip) .screen .pnav button { font-size: 8px; padding: 0 4px; border-radius: 2px; }
+.strip:not(.vau-strip) .screen .ph span { font-size: 8.5px; }
+.strip:not(.vau-strip) .screen .pr { grid-template-columns: 54px 1fr 30px; gap: 4px; }
+.strip:not(.vau-strip) .screen .pr .pb { height: 4px; }
+.strip:not(.vau-strip) .screen .pnote { font-size: 8.5px; }
+.strip:not(.vau-strip) .screen .psp .spark { height: 26px; }
+.desk.tight .strip:not(.vau-strip) .knob svg { width: 26px; height: 26px; }
+.desk.tight .strip:not(.vau-strip) .fwell { min-height: 36px; }
+#basetext .tok, #benttext .tok { cursor: pointer; }
+
+/* ---------------- before and after */
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+@media (max-width: 900px) { .pair { grid-template-columns: 1fr; } }
+.panel { border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); min-width: 0; }
+.panel .ph { display: flex; gap: 8px; align-items: baseline; padding: 9px 12px; border-bottom: 1px solid var(--border); font-size: 12.5px; color: var(--text-2); flex-wrap: wrap; }
+.panel .ph b { color: var(--text); font-size: 13px; }
+.panel .ph .stat { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--text-3); }
+.text { padding: 10px 12px 12px 0; font-size: var(--read-size, 15px); line-height: 1.65; min-height: 120px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.text .ln { display: grid; grid-template-columns: 44px minmax(0, 1fr); }   /* minmax(0, …): a long unbroken run (a row of dots) wraps instead of widening the column */
+.text .ln > span:last-child { min-width: 0; overflow-wrap: anywhere; word-break: break-word; }
+.text .ln .no { font: 11.5px var(--mono); color: var(--text-3); text-align: right; padding-right: 12px; cursor: pointer; user-select: none; padding-top: 3px; }
+.text .ln .no:hover { color: var(--accent); }
+.text .ln .no.has { color: var(--accent); font-weight: 700; }
+.text .ln .no.sel { background: var(--accent-soft); color: var(--accent); border-radius: 4px; }
+.text .prompt { color: var(--text-3); }
+.text .add { background: var(--add); color: var(--add-ink); border-radius: 3px; }
+.text .rem { background: var(--rem); color: var(--rem-ink); border-radius: 3px; text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--rem-ink) 45%, transparent); }
+.text .tok { border-radius: 3px; cursor: default; }
+.text .tok.div { outline: 2px solid var(--accent); background: var(--mark); }
+.text .tok.after { opacity: .9; }
+.text .tok.rp-hid { visibility: hidden; }   /* a replay: tokens not written yet keep their place */
+#tempobtn { font: 600 9.5px/1 var(--mono); letter-spacing: -.02em; }
+.divbox { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+.divbox .dl { font-size: 13px; }
+.topk { font: 12px var(--mono); display: grid; grid-template-columns: auto 1fr auto; gap: 2px 10px; align-items: center; margin-top: 6px; }
+.topk .bar { height: 7px; background: color-mix(in srgb, var(--accent) 60%, transparent); border-radius: 3px; }
+.topk .chosen { font-weight: 700; color: var(--accent); }
+.metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-top: 14px; }
+.metric { border: 1px solid var(--border); border-radius: 10px; padding: 8px 11px; background: var(--surface); }
+.metric .mk { font-size: 11.5px; color: var(--text-3); }
+.metric .mv { font: 600 15px var(--mono); }
+.metric .mb { font-size: 11.5px; color: var(--text-3); }
+
+/* annotations (LLMbench's six types) */
+.annots { display: grid; gap: 6px; margin-top: 10px; }
+.annot { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; font-size: 13px; padding: 6px 9px; border-radius: 8px; background: var(--surface); border-left: 4px solid var(--c, var(--accent)); }
+.annot .ty { font: 600 10.5px var(--mono); text-transform: uppercase; color: var(--c); padding-top: 2px; }
+.annform { display: none; gap: 8px; margin-top: 10px; align-items: start; flex-wrap: wrap; }
+.annform.on { display: flex; }
+.annform textarea { font-family: inherit; font-size: 13.5px; flex: 1; min-width: 240px; }
+
+/* ---------------- probabilities */
+.heat .tok { padding: 1px 0; border-radius: 3px; }
+.legend { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--text-3); flex-wrap: wrap; }
+.legend .ramp { width: 160px; height: 10px; border-radius: 3px; background: linear-gradient(90deg, hsl(5 95% 42%), hsl(30 92% 60%), hsl(52 88% 85%), transparent); border: 1px solid var(--border); }
+.tip { position: fixed; z-index: 50; pointer-events: none; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; box-shadow: 0 10px 30px rgba(0,0,0,.18); font-size: 12.5px; max-width: 320px; display: none; }
+
+/* ---------------- sweep, band, map */
+.dose { border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; background: var(--surface-2); }
+.dose.broken { border-color: color-mix(in srgb, var(--critical) 50%, var(--border)); }
+.dose .dh { display: flex; gap: 10px; font: 12px var(--mono); color: var(--text-2); flex-wrap: wrap; align-items: baseline; }
+.dose .dt { font-size: 14px; margin-top: 4px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.stack { display: grid; gap: 8px; }
+.chart svg { width: 100%; height: auto; display: block; }
+.charts { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 10px 18px; }
+.charts svg { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.chart text { font: 10.5px var(--mono); fill: var(--text-3); }
+.mapgrid { display: grid; gap: 2px; font: 10px var(--mono); }
+.mapgrid .c { aspect-ratio: 1.6; border-radius: 3px; cursor: pointer; display: grid; place-items: center; color: transparent; min-width: 0; }
+.mapgrid .c:hover { outline: 2px solid var(--accent); color: var(--text); }
+.mapgrid .c.sel { outline: 2px solid var(--text); }
+.mapgrid .lab { color: var(--text-3); display: grid; place-items: center; }
+.variorum td { cursor: default; }
+.variorum tr.cur td { background: var(--accent-soft); }
+.tree { font: 12.5px var(--mono); white-space: pre; overflow: auto; }
+.help h3 { font-size: 15px; color: var(--text); margin: 18px 0 6px; }
+.help p, .help li { max-width: 820px; color: var(--text-2); }
+.help code { background: var(--surface-2); padding: 1px 5px; border-radius: 5px; }
+</style>
+<!-- the Core Collection's look for a unit's card: the --vu-* properties the CSS above reads, set on .vau-core, and the VAU mark (vau/look/core.css, SPEC 5d) -->
+<link rel="stylesheet" href="/vau/look/card.css">
+<link rel="stylesheet" href="/vau/look/core.css">
+</head>
+<body>
+<header class="bar">
+  <div class="brand" id="brand" title="About Abliteration Lens"><img src="mark.svg" alt=""><span>Abliteration Lens</span><span class="ver" id="ver"></span></div>
+  <nav class="tabs" id="tabs" role="tablist">
+    <button data-v="bench" aria-selected="true">Bench</button>
+    <button data-v="probs">Probabilities</button>
+    <button data-v="sweep">Dose sweep</button>
+    <button data-v="band">Control band</button>
+    <button data-v="map">Component map</button>
+    <button data-v="dirs">Directions</button>
+    <button data-v="variorum">Variorum</button>
+  </nav>
+  <div class="transport" role="group" aria-label="Transport">
+    <button class="tp play" id="runbtn" title="Run before and after (Space)" aria-label="Run before and after">▶</button>
+    <button class="tp stop" id="stopbtn" title="Stop (Space)" aria-label="Stop" disabled>■</button>
+    <label class="tp live" title="Update as the chain changes: each change to the chain, the prompt or the sampler starts a new run"><input type="checkbox" id="live" aria-label="Update as the chain changes"><span aria-hidden="true">⟳</span></label>
+  </div>
+  <div class="transport viewswap" role="group" aria-label="View" hidden><!-- the Session is hidden for now: SESSION in workspace.js -->
+    <button class="tp" id="vw-arr" aria-pressed="true" title="Arrangement: the two texts, token by token, with the playhead">☰</button>
+    <button class="tp" id="vw-ses" aria-pressed="false" title="Session: a grid of prompts against chains">▦</button>
+  </div>
+  <div class="modelchip" id="modelchip">No model loaded</div>
+  <div class="barbtns">
+    <button class="icon-btn" id="themebtn" title="Theme: the system's setting, light or dark (more in ⚙ Settings)">◐</button>
+    <button class="icon-btn" id="btn-help" title="Help: each intervention and each measure">?</button>
+    <button class="icon-btn" id="btn-about" title="About Abliteration Lens, and how to cite it">ⓘ</button>
+    <button class="icon-btn" id="btn-settings" title="Settings: your initials, theme, text size, code font and starting values">⚙</button>
+  </div>
+</header>
+
+<main>
+<!-- ================================================================ BENCH -->
+<section class="view on" id="v-bench">
+  <div id="benchmid">
+    <aside id="browser" aria-label="Browser">
+      <div class="br-head">
+        <input type="search" id="brsearch" placeholder="Search" aria-label="Search the browser" title="Search interventions, meters, directions, chains and runs">
+        <button class="br-fold" id="brfold" title="Fold the browser away (Ctrl+Alt+B)" aria-label="Fold the browser">◂</button>
+      </div>
+      <div class="br-body" id="brbody"></div>
+      <button class="br-rail" id="brrail" title="Show the browser (Ctrl+Alt+B)" aria-label="Show the browser">▸</button>
+    </aside>
+    <div id="benchtop">
+      <div id="arrangement">
+        <div class="timeline" id="timeline" tabindex="0" role="slider" aria-label="Step" title="The texts token by token. Click or drag to move the playhead; the meters on the desk follow it. Left and right arrow keys step."></div>
+      <div class="card" id="result">
+        <div class="docktools rtools" role="toolbar" aria-label="The texts" aria-orientation="vertical">
+          <span class="dt-group" id="showmode">
+            <button data-m="diff" aria-pressed="true" title="Diff: the words only one text has, marked">±</button>
+            <button data-m="tokens" aria-pressed="false" title="Tokens: the texts token by token; click a token to show its step on the meters"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="1" y="5" width="4" height="6" rx="1"/><rect x="6" y="5" width="4" height="6" rx="1"/><rect x="11" y="5" width="4" height="6" rx="1"/></svg></button>
+            <button data-m="plain" aria-pressed="false" title="Plain: the two texts as written">¶</button>
+          </span>
+          <span class="dt-group" id="cmpmode" hidden>
+            <button data-c="base" aria-pressed="true" title="Set the diverged text against the original: the original model, same seed">O</button>
+            <button data-c="pin" aria-pressed="false" title="Set the diverged text against the pinned run"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 1.5h5l-.8 4.2 2.8 2.8h-9l2.8-2.8z"/><path d="M8 8.5v6"/></svg></button>
+          </span>
+          <span class="dt-group" id="playgroup">
+            <button id="replaybtn" aria-pressed="false" title="Replay: write the two texts out again side by side, token by token at the tempo, with the timeline and the meters following">▶</button>
+            <button id="tempobtn" title="Tempo">∞</button>
+          </span>
+          <span class="dt-sep"></span>
+          <span class="dt-tools" id="runactions" hidden>
+            <button data-menu="export" aria-haspopup="menu" aria-expanded="false" title="Export this run: as Markdown, as JSON, or its recipe"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M4.5 6.8 8 10.3l3.5-3.5M2.5 13.5h11"/></svg></button>
+            <button data-menu="again" aria-haspopup="menu" aria-expanded="false" title="Run it again: from its recipe, or across reseeds (the control band)">⋯</button>
+          </span>
+          <button id="runid" title="No run yet">#</button>
+        </div>
+        <div class="pair">
+          <div class="panel"><div class="ph"><b id="basename">Original</b><span id="basesub">original model, same seed</span><span class="stat" id="basestat"></span></div><div class="text" id="basetext"><div class="note" style="padding-left:12px">Load a model, write a chain and run.</div></div></div>
+          <div class="panel"><div class="ph"><b>Diverged</b><span id="bentlabel">through the chain</span><span class="stat" id="bentstat"></span></div><div class="text" id="benttext"></div></div>
+        </div>
+        <div id="divergence"></div>
+        <div class="metrics" id="metrics"></div>
+        <div class="annform" id="annform">
+          <select id="anntype"><option>observation</option><option>question</option><option>metaphor</option><option>pattern</option><option>context</option><option>critique</option></select>
+          <textarea id="anntext" rows="2" placeholder="Annotation on the selected line"></textarea>
+          <button class="b primary small" id="annsave">Save</button><button class="b small" id="anncancel">Cancel</button>
+          <span class="note" id="annwhere"></span>
+        </div>
+        <div class="annots" id="annots"></div>
+      </div>
+      </div>
+      <div id="session" hidden>
+        <div class="card">
+          <h2>Session <span class="aside">prompts against chains, with the Instrument's sampler and seed</span></h2>
+          <div class="sess-wrap"><table class="sess" id="sessgrid"></table></div>
+          <div class="row" style="margin-top:12px; align-items:center">
+            <button class="b small" id="sessaddp" title="Add the Instrument's prompt as a new row">+ Prompt</button>
+            <button class="b small" id="sessaddc" title="Add the desk's chain as a new column">+ Chain</button>
+            <button class="b small primary" id="sessall" title="Run every empty cell, one after another">Run every empty cell</button>
+            <button class="b small" id="sessclear" title="Empty every cell (the runs stay in the Variorum)">Clear cells</button>
+            <span class="note" id="sessnote"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="benchdock">
+    <div class="dock-handle" id="dockhandle" tabindex="0" role="separator" aria-orientation="horizontal" aria-label="Resize the chain"
+      title="Drag to make the chain taller or shorter. Double-click (or Enter) folds it down to this bar and brings it back. Up and down arrow keys resize it."></div>
+    <div class="dockbody">
+      <div class="docktools" role="toolbar" aria-label="Chain tools" aria-orientation="vertical">
+        <span class="dt-group" id="chainmode">
+          <button data-m="desk" aria-pressed="true" title="Desk: the chain as strips, left to right">▥</button>
+          <button data-m="text" aria-pressed="false" title="Text: the chain as text, one intervention per line">≡</button>
+          <button data-m="code" aria-pressed="false" title="Code: the hooks the chain registers, and their source">{}</button>
+        </span>
+        <span class="dt-sep"></span>
+        <button id="dtsave" title="Save the chain under a name, in the browser's Chains">☆</button>
+        <button id="dtundo" title="Put back the last strip removed (⌘Z or Ctrl+Z)" disabled>↶</button>
+        <span class="dt-sep"></span>
+        <button id="dtfig" title="Snap: the Bench as it is on screen, as a PNG"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="1.5" y="4" width="13" height="9.5" rx="2"/><circle cx="8" cy="8.7" r="2.6"/><path d="M5.6 4l1.1-2h2.6l1.1 2"/></svg></button>
+        <button id="dtpin" aria-pressed="false" title="Pin this run: later runs can be set against it as well as against the original"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 1.5h5l-.8 4.2 2.8 2.8h-9l2.8-2.8z"/><path d="M8 8.5v6"/></svg></button>
+        <button id="dtsweep" title="Sweep: move the selected strip, on its own, across every place its target can take (each head, block or layer), and read how loud the change is at each, on the last run's original text"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="1.5" y="2" width="13" height="12" rx="1.5"/><path d="M1.5 6h13M1.5 10h13M5.8 2v12M10.2 2v12"/><rect x="6.4" y="6.6" width="3.2" height="2.8" fill="currentColor" stroke="none"/></svg></button>
+        <button id="dtloo" title="Leave one out: run the chain once without each strip, and mark each strip with how much the text changes without it"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="1.5" y="3" width="3.4" height="10" rx="1"/><rect x="6.3" y="3" width="3.4" height="10" rx="1" stroke-dasharray="1.6 1.4"/><rect x="11.1" y="3" width="3.4" height="10" rx="1"/></svg></button>
+      </div>
+      <span id="chainstatus" class="chainok" role="status"></span>
+      <div class="instrument" id="instrument" data-info="Instrument: the model, the prompt it plays and the sampler's settings. The strips to its right bend the model while it plays; the sampler acts last, on each token.">
+        <div class="ih"><b id="insttitle">Instrument</b><span class="iinfo" id="modelinfo"></span></div>
+        <div class="imodel">
+          <input id="modelid" list="presetlist" value="openai-community/gpt2" spellcheck="false" aria-label="Model: preset or Hugging Face id" title="Model: a preset or a Hugging Face id">
+          <datalist id="presetlist"></datalist>
+          <input id="revision" list="revlist" placeholder="main" spellcheck="false" aria-label="Revision" title="Revision: a checkpoint, or main"><datalist id="revlist"></datalist>
+          <button class="ib" id="loadbtn" title="Load this model">Load</button>
+          <button class="ib iabout" id="modelinfobtn" title="About this model: its maker, licence, architecture, size and what runs on it" aria-label="About this model">i</button>
+        </div>
+        <div class="inote" id="presetnote"></div>
+        <div class="iprompt">
+          <textarea id="prompt" rows="3" spellcheck="false" aria-label="Prompt" title="The prompt: what the instrument plays">The most important thing about the city is</textarea>
+          <button class="ipick" id="promptpick" aria-haspopup="menu" aria-expanded="false" title="Earlier prompts: pick one to play it again (the chain stays as it is)">▾</button>
+        </div>
+        <div class="iknobs">
+          <input id="temp" class="num" type="number" step="0.05" value="0.8" data-knob="Temperature" data-min="0" data-max="2" data-step="0.05">
+          <input id="topk" class="num" type="number" value="40" data-knob="Top-k" data-min="0" data-max="200" data-int="1">
+          <input id="topp" class="num" type="number" step="0.01" value="0.95" data-knob="Top-p" data-min="0.05" data-max="1" data-step="0.01">
+          <input id="maxtok" class="num" type="number" value="60" data-knob="Tokens" data-min="1" data-max="512" data-int="1">
+        </div>
+        <div class="iseed">
+          <span>Seed</span>
+          <button class="ib" id="seedprev" title="The previous seed">◀</button>
+          <input id="seed" class="num" type="number" value="1" aria-label="Seed" title="Seed: the same seed gives the same text from the same model and chain">
+          <button class="ib" id="seednext" title="The next seed">▶</button>
+          <button class="ib" id="seedrand" title="A random seed">⚄</button>
+        </div>
+      </div>
+      <div id="deskwrap"><div class="desk" id="desk"></div></div>
+      <div id="textwrap" hidden>
+        <textarea id="chain" rows="8" spellcheck="false"></textarea>
+        <div class="note">One intervention per line, worked top to bottom. A line starting with # is bypassed. Components are numbered by block (<code>head=5.1</code>, <code>attn=5</code>, <code>mlp=5</code>, <code>block=5</code>); the residual stream by hidden-state layer (<code>layer=0</code> is the embeddings, <code>layer=12</code> the last block's output). Help lists every intervention.</div>
+      </div>
+      <div id="codewrap" hidden><pre class="code" id="code"></pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ PROBABILITIES -->
+<section class="view" id="v-probs">
+  <div class="card">
+    <h2>Probabilities <span class="aside"><span class="seg" id="unitmode"><button data-u="ppl" aria-pressed="true">Perplexity</button><button data-u="bits" aria-pressed="false">Bits</button></span></span></h2>
+    <p class="note">Each token is coloured by its probability under the model named above the panel: no colour at 70% or more, deepening as the probability falls (LLMbench's scale). Each text is shown under its own model and under the other: the diverged text under the original model measures how far the bending has pushed the prose off the trained distribution; the original text under the diverged model shows what the diverged model now finds improbable. Both models are the same weights, with and without the chain's hooks; the scores are never pooled. Sampler bends leave the model untouched, so for them the two models are the same.</p>
+    <div class="legend"><span>p ≥ 0.70</span><span class="ramp" style="transform:scaleX(-1)"></span><span>p → 0</span></div>
+    <div id="probsbody" class="grid2" style="margin-top:14px"><div class="note">Run a chain on the Bench first.</div></div>
+  </div>
+</section>
+
+<!-- ================================================================ SWEEP -->
+<section class="view" id="v-sweep">
+  <div class="card">
+    <h2>Dose sweep <span class="aside">one knob across a range, outputs stacked</span></h2>
+    <div class="row">
+      <label class="f" style="flex:2 1 300px">Knob <select id="sweepknob"></select></label>
+      <label class="f">From <input id="sweepfrom" class="num" type="number" step="any" value="0"></label>
+      <label class="f">To <input id="sweepto" class="num" type="number" step="any" value="8"></label>
+      <label class="f">Steps <input id="sweepn" class="num" type="number" value="9"></label>
+      <button class="b" id="sweepstop" disabled>Stop</button>
+      <button class="b primary" id="sweepbtn">Sweep</button>
+      <label class="f">Saved <select id="sweepsaved"><option value="">…</option></select></label>
+    </div>
+    <p class="note" id="sweeprule"></p>
+    <div class="progress"><i id="sweepprog"></i></div>
+    <div class="chart" id="sweepchart" style="margin-top:12px"></div>
+    <div class="stack" id="sweepout" style="margin-top:12px"></div>
+  </div>
+</section>
+
+<!-- ================================================================ BAND -->
+<section class="view" id="v-band">
+  <div class="card">
+    <h2>Control band <span class="aside" id="bandfor"></span></h2>
+    <p class="note">The original is generated again with n other seeds (the recipe's seed + 1 to + n), and each reseed is measured against the original at the recipe's seed in the same way as the diverged text. A diverged value inside the reseeds' range is reported as inside the band: the chain moved the text no further than a change of seed does.</p>
+    <div class="row"><label class="f">Reseeds <input id="bandn" class="num" type="number" value="8"></label><button class="b" id="bandstop" disabled>Stop</button><button class="b primary" id="bandbtn">Make the band</button></div>
+    <div class="progress" style="margin-top:12px"><i id="bandprog"></i></div>
+    <div id="bandout" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- ================================================================ MAP -->
+<section class="view" id="v-map">
+  <div class="card">
+    <h2>Component map <span class="aside">one intervention swept across every head or layer</span></h2>
+    <div class="row">
+      <label class="f">Sweep <select id="mapkind">
+        <option value="head-zero">Zero-ablate each head</option><option value="head-mean">Mean-ablate each head</option>
+        <option value="head-scale">Scale each head by k</option><option value="attn-zero">Zero-ablate each attention layer</option>
+        <option value="mlp-zero">Zero-ablate each MLP</option><option value="mlp-mean">Mean-ablate each MLP</option>
+        <option value="block-zero">Remove each block</option><option value="block-mean">Mean-ablate each block</option></select></label>
+      <label class="f">k <input id="mapk" class="num" type="number" step="any" value="2"></label>
+      <label class="f">Tokens <input id="maptok" class="num" type="number" value="40"></label>
+      <label class="f">Probe <select id="mapprobe">
+        <option value="antithesis">Antithesis constructions (Grammar Probe)</option><option value="not_x_but_y">Not X but Y</option>
+        <option value="hedging">Hedges</option><option value="boosters">Boosters</option><option value="limiting">Negation words</option>
+        <option value="attitude">Evaluative words</option><option value="distinct2">Distinct-2</option><option value="repetition">Repetition</option>
+        <option value="under_base_bits">Surprisal under the original model</option><option value="edit">Distance from the original</option></select></label>
+      <label class="f">Saved <select id="mapsaved"><option value="">…</option></select></label>
+    </div>
+    <label class="f" style="margin-top:10px">Prompts, one per line <span class="hint">the seed and sampler come from the Bench; the chain on the Bench is applied first if “Apply the Bench's chain” is ticked</span>
+      <textarea id="mapprompts" rows="3" style="font-family:inherit">The real purpose of education is
+What makes a city worth living in is
+Technology has changed the way we</textarea></label>
+    <div class="row" style="margin-top:10px; align-items:center"><span class="chk"><input type="checkbox" id="mapchain"> Apply the Bench's chain under each cell</span><span class="note" id="mapcost"></span><span style="margin-left:auto"></span><button class="b" id="mapstop" disabled>Stop</button><button class="b primary" id="mapbtn">Run the map</button></div>
+    <div class="progress" style="margin-top:12px"><i id="mapprog"></i></div>
+    <p class="note" id="mapnote"></p>
+    <div class="grid2" style="margin-top:6px"><div id="mapgrid"></div><div id="mapcell"></div></div>
+  </div>
+</section>
+
+<!-- ================================================================ DIRECTIONS -->
+<section class="view" id="v-dirs">
+  <div class="card">
+    <h2>Directions <span class="aside">for Steer and Project out</span></h2>
+    <p class="note">A direction is a vector in the residual stream, made here from two lists of texts, from one word, or from a sentence or passage against the reference corpus. It is a product of what it was made from. Finding where a direction lives, with its PCA and separability charts, is Vectorscope's work; here a direction is used. Directions are kept per model in <code>data/directions/</code>; a recipe carries the ones it uses.</p>
+    <div class="grid2">
+      <div>
+        <h3>Make one</h3>
+        <div class="row"><label class="f" style="flex:1">Name <input id="dirname" placeholder="negation" spellcheck="false"></label>
+          <label class="f">Layer <span class="hint">blank: chosen for you</span><input id="dirlayer" class="num" placeholder="auto"></label></div>
+        <div class="seg" id="dirkind" style="margin-top:10px"><button data-k="lists" aria-pressed="true">Two lists</button><button data-k="word" aria-pressed="false">A word</button><button data-k="text" aria-pressed="false">A sentence or passage</button><button data-k="decision" aria-pressed="false">Where it decides</button><button data-k="combine" aria-pressed="false">Add and subtract</button></div>
+        <div data-dk="lists">
+          <label class="f" style="margin-top:8px">From a contrast set <select id="dircontrast"><option value="">Two lists below</option></select></label>
+          <div class="grid2" style="margin-top:8px">
+            <label class="f">Positive, one per line<textarea id="dirpos" rows="5" style="font-family:inherit"></textarea></label>
+            <label class="f">Negative, one per line<textarea id="dirneg" rows="5" style="font-family:inherit"></textarea></label>
+          </div>
+          <label class="f" style="margin-top:8px">Method <select id="dirmethod"><option value="mean">Difference of means</option><option value="pca-diff">PCA of the pairs' differences</option><option value="pca-center">PCA about each pair's midpoint</option></select></label>
+          <details class="tmpl" style="margin-top:8px"><summary>Make pairs from a template</summary>
+            <label class="f" style="margin-top:6px">Template, with {x} where the words go <input id="tmpl" placeholder="The weather today is {x}"></label>
+            <div class="grid2" style="margin-top:6px">
+              <label class="f">Positive words, separated by commas <input id="tmplpos" placeholder="cold, wet, grey"></label>
+              <label class="f">Negative words, in the same order <input id="tmplneg" placeholder="warm, dry, bright"></label>
+            </div>
+            <label class="f" style="margin-top:6px">Endings <select id="tmplsuf"><option value="none">None</option><option value="corpus">The first few words of each corpus passage</option></select></label>
+            <div class="row" style="margin-top:6px"><button class="b" id="tmplfill" title="Fill the two lists with the template's pairs">Fill the lists</button></div>
+            <p class="note">Each positive word goes with the negative word in the same place, and each pair is written once for every ending, so the lists line up pair by pair, as the PCA methods read them. repeng builds its contrast sets this way, with endings cut from the model's own writing.</p>
+          </details>
+          <p class="note">The difference between the two lists' mean residual vectors at their last token, at every layer (Vectorscope's method). Whatever separates the lists is in it. The PCA methods (inspired by repeng) read the lists as pairs, line by line: the first principal component of the pairs' differences, or of both lists centred on each pair's midpoint, signed so that most positives lie above their negatives and scaled to the difference of means along it.</p>
+        </div>
+        <div data-dk="combine" hidden>
+          <label class="f" style="margin-top:8px">Sum, with spaces around + and - <input id="dircombine" placeholder="negation - 0.5 * not-x-but-y" spellcheck="false" style="font-family:var(--mono)"></label>
+          <p class="note">A direction made from others, layer by layer: each term is a direction's name, or a number, * and a name. The directions must belong to the same model. A word's direction, which has one vector, counts at every layer.</p>
+        </div>
+        <div data-dk="word" hidden>
+          <label class="f" style="margin-top:8px">Word <input id="dirword" placeholder="&quot; not&quot;: GPT-2 words usually start with a space" spellcheck="false" style="font-family:var(--mono)"></label>
+          <p class="note">The word as the output layer writes it: the word's row of the unembedding matrix. Project it out at the top layer (<code>layer=12</code> for GPT-2) and the word drops out of the likely next tokens while the rest of the text stays fluent; at every layer it also changes how the model reads. Steer with a negative scale to push away from it. A word of several tokens uses its first. The layer box is not used. To take away what the model holds after reading a word, make a direction from a sentence instead, with the word in it.</p>
+        </div>
+        <div data-dk="text" hidden>
+          <label class="f" style="margin-top:8px">Sentence or passage, several on separate lines<textarea id="dirtext" rows="5" style="font-family:inherit" placeholder="The sea was grey and the boats lay still in the harbour."></textarea></label>
+          <p class="note">How the residual stream on these texts differs from the stream on the reference corpus: the mean over the texts' tokens minus the mean over the corpus's tokens, at every layer. Several lines are averaged. Blank layer: where the texts stand furthest from the corpus.</p>
+        </div>
+        <div data-dk="decision" hidden>
+          <label class="f" style="margin-top:8px">Words, separated by commas <input id="dirdwords" placeholder="&quot; not, never, no&quot;" spellcheck="false" style="font-family:var(--mono)"></label>
+          <label class="f" style="margin-top:8px">More contexts <span class="hint">optional, one per line; the reference corpus is always read</span><textarea id="dirdtext" rows="3" style="font-family:inherit"></textarea></label>
+          <label class="f" style="margin-top:8px">Share of positions <span class="hint">the top share counts as about to write</span><input id="dirdshare" class="num" value="0.1"></label>
+          <div class="row" style="margin-top:6px"><button class="b" id="neurfind" title="List the MLP neurons that fire most differently where the model is about to write these words">Find neurons</button></div>
+          <div id="neurlist"></div>
+          <p class="note">Where the model is about to write one of the words. The model reads the reference corpus (and any contexts above) and at every position gives a chance that the next token is one of them; the direction at each layer is the mean residual stream at the positions where that chance is highest minus the mean where it is lowest. It is read where the model decides, before the word, as Arditi et al. read the refusal direction at the end of the instruction. A contrast set is read at the end of each sentence, after the construction, so its direction marks having written it. Project this one out, or Abliterate with it, to stop the model writing the words; Steer with it to make them likelier. Each word counts by its first token.</p>
+        </div>
+        <div class="row" style="margin-top:8px"><button class="b primary" id="dirmake">Make the direction</button>
+          <label class="b" style="cursor:pointer">Import a file…<input type="file" id="dirfile" accept=".json,.gguf" hidden></label></div>
+        <p class="note">Import reads this tool's direction files (also written by Ablation Bench), Vectorscope Grammar Steering exports, and llama.cpp control vectors (.gguf, as repeng writes them). A control vector's direction.N is added at the output of block N, which is this bench's layer N + 1; GGUF exports write layers 2 to n that way, and layers 0 and 1 have no place in the format.</p>
+        <p class="note" id="dircontrastnote"></p>
+      </div>
+      <div><h3>On this machine</h3><div id="dirlist"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ VARIORUM -->
+<section class="view" id="v-variorum">
+  <div class="card">
+    <h2>Variorum <span class="aside">every run kept as witnesses with its recipe</span></h2>
+    <div class="row" style="margin-bottom:12px">
+      <button class="b small" id="varrefresh">Refresh</button>
+      <button class="b small" id="varcompare">Compare the two ticked</button>
+      <button class="b small" id="varbench">Export bench-kit bundle</button>
+      <label class="b small" style="cursor:pointer">Load a recipe…<input type="file" id="recipefile" accept=".json" hidden></label>
+      <span class="note">Open puts a run back on the Bench. A run made after opening another records it as its parent; a regeneration records the run it regenerates as the one it witnesses.</span>
+    </div>
+    <div style="overflow-x:auto"><table class="t variorum" id="vartable"></table></div>
+    <h3>Descent</h3><div class="tree" id="vartree"></div>
+    <div id="varcmp" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- ================================================================ HELP -->
+</main>
+<footer class="infobar" id="infobar"><span id="infotext"></span><span id="infostatus"></span></footer>
+<div class="tip" id="tip"></div>
+<script src="boxes.js"></script>
+<script src="units.js"></script>
+<script src="/vau/look/card.js"></script>   <!-- VAU's card runtime: draws a unit's card (VAU SPEC 5f) -->
+<script src="desk.js"></script>
+<script src="app.js"></script>
+<script src="help.js"></script>
+<script src="workspace.js"></script>
+</body>
+</html>

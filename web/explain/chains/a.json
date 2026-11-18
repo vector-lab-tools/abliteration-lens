@@ -1,0 +1,8 @@
+{
+  "ablate": ["ablate head=5.1 mode=zero", "ablate head=5.1 mode=mean", "ablate attn=5 mode=zero", "ablate mlp=5 mode=mean"],
+  "scale": ["scale mlp=6 k=1", "scale mlp=6 k=0.5", "scale mlp=6 k=0", "scale mlp=6 k=-1", "scale mlp=6 k=2"],
+  "coarsen": ["coarsen block=5 bits=8", "coarsen block=5 bits=4", "coarsen block=5 bits=3", "coarsen block=5 bits=2"],
+  "reorder": ["reorder skip=6", "reorder repeat=5", "reorder swap=3,8", "reorder skip=3-5"],
+  "exit": ["exit layer=12", "exit layer=11", "exit layer=8", "exit layer=4"],
+  "position": ["position mode=shift k=0", "position mode=shift k=200", "position mode=shift k=600", "position mode=scramble", "position mode=freeze k=0"]
+}

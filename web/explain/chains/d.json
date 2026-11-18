@@ -1,0 +1,7 @@
+{
+  "chorus": ["chorus layer=6 voices=0 sigma=0.3", "chorus layer=6 voices=3 sigma=0.3", "chorus layer=6 voices=8 sigma=0.3", "chorus layer=6 voices=3 sigma=1"],
+  "tap": ["tap layer=0", "tap layer=4", "tap layer=8", "tap layer=12"],
+  "meter": ["meter layer=0", "meter layer=4", "meter layer=8", "meter layer=12"],
+  "gauge": ["gauge layer=4 dir=negation", "gauge layer=8 dir=negation", "gauge layer=12 dir=negation"],
+  "scope": ["scope head=5.1", "scope head=4.11", "scope head=0.1", "scope head=0.9"]
+}

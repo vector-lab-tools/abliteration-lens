@@ -1,0 +1,37 @@
+{
+  "pan": [
+    "pan block=all depth=4 pan=0",
+    "pan block=all depth=4 pan=0.5",
+    "pan block=all depth=4 pan=1",
+    "pan block=all depth=4 pan=-1"
+  ],
+  "rewrite": [
+    "rewrite block=5 prompt=\"What matters about the archive is\" subject=\"archive\" target=\" silence\" amount=0",
+    "rewrite block=5 prompt=\"What matters about the archive is\" subject=\"archive\" target=\" silence\" amount=0.5",
+    "rewrite block=5 prompt=\"What matters about the archive is\" subject=\"archive\" target=\" silence\" amount=1 save=explain-archive",
+    "rewrite block=5 prompt=\"What matters about the archive is\" subject=\"archive\" target=\" silence\" amount=2"
+  ],
+  "patch": [
+    "patch file=explain-archive scale=0",
+    "patch file=explain-archive scale=0.5",
+    "patch file=explain-archive scale=1",
+    "patch file=explain-archive scale=2"
+  ],
+  "token": [
+    "token word=\" archive\" mode=zero",
+    "token word=\" that\" mode=ban",
+    "token word=\" that, the\" mode=ban"
+  ],
+  "sample": [
+    "sample mode=ban-top k=1",
+    "sample mode=ban-top k=3",
+    "sample mode=ceiling p=0.2",
+    "sample mode=invert"
+  ],
+  "contrast": [
+    "steer layer=6 dir=negation scale=4\ncontrast alpha=0 keep=0.1",
+    "steer layer=6 dir=negation scale=4\ncontrast alpha=0.5 keep=0.1",
+    "steer layer=6 dir=negation scale=4\ncontrast alpha=1 keep=0.1",
+    "steer layer=6 dir=negation scale=4\ncontrast alpha=2 keep=0.1"
+  ]
+}

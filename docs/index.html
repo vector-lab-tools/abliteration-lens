@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Abliteration Lens</title>
+  <meta name="description" content="Abliteration Lens: a local mixing desk for a language model's forward pass. Strips bend the model while it writes; the diverged text sits beside the original. A Vector Lab tool.">
+  <link rel="icon" href="img/mark.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#f3f2ee" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e1015" media="(prefers-color-scheme: dark)">
+  <meta property="og:title" content="Abliteration Lens">
+  <meta property="og:description" content="A mixing desk for a language model's forward pass. Runs on your own machine.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://vector-lab-tools.github.io/abliteration-lens/">
+  <meta property="og:image" content="https://vector-lab-tools.github.io/abliteration-lens/img/hero.webp">
+  <script>(function(){try{var t=localStorage.getItem('abl-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- Written by hand. Copyright (C) 2026 David M. Berry. SPDX-License-Identifier: GPL-3.0-or-later -->
+<a class="skip" href="#main">Skip to the content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Abliteration Lens, home">
+      <img src="img/mark.svg" alt="">
+      <span class="brand-block">
+        <span class="brand-name">Abliteration Lens</span>
+        <span class="brand-tagline">A Vector Lab instrument</span>
+      </span>
+    </a>
+    <div class="head-tools">
+      <nav class="site-nav" aria-label="Sections">
+        <a href="#desk">Desk</a>
+        <a href="#how">How it works</a>
+        <a href="strips.html">Strips</a>
+        <a href="abliteration.html">Abliteration</a>
+        <a href="#views">Views</a>
+        <a href="#recipes">Recipes</a>
+        <a href="#holes">Rabbit holes</a>
+        <a href="#start">Get started</a>
+        <span class="nav-sep" aria-hidden="true"></span>
+        <a class="ext" href="https://github.com/vector-lab-tools/abliteration-lens">GitHub</a>
+        <a class="ext vau" href="https://vector-lab-tools.github.io/vector-abliteration-units/" title="Vector Abliteration Units: the unit standard whose first host this is">VAU ↗</a>
+      </nav>
+      <button class="theme-toggle" type="button" aria-label="Switch between light and dark" title="Switch between light and dark">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <svg class="wave" viewBox="0 0 1200 600" preserveAspectRatio="none" aria-hidden="true">
+    <path id="wave-dry" fill="none" stroke-width="1.4" class="s-dim"/>
+    <path id="wave-wet" fill="none" stroke-width="1.6" class="s-acc"/>
+  </svg>
+  <div class="wrap hero-inner">
+    <span class="kicker">Vector Lab · instrument · alpha · version 0.1.16</span>
+    <h1><span class="glitch" id="title" data-text="Abliteration Lens">Abliteration Lens</span></h1>
+    <p class="tagline">A mixing desk for a language model's forward pass. Load an open-weight model, put strips on the desk, press <kbd>Space</kbd>, and read the text the bent model writes beside the text the unchanged model writes from the same prompt and the same seed. It runs on your own machine, and nothing leaves it.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#start">Get started</a>
+      <a class="btn" href="#how">How it works</a>
+      <a class="btn" href="https://github.com/vector-lab-tools/abliteration-lens">Source on GitHub</a>
+      <a class="btn" href="https://vector-lab-tools.github.io/vector-abliteration-units/">The VAU standard</a>
+    </div>
+    <figure class="hero-shot">
+      <a class="screen shot" id="hero-screen" href="img/hero.webp" data-cap="The Bench: a vShrink, a vLookback, a vRotate and a vBands at layer 6 of GPT-2 small, with a Level meter at layer 8. The vLookback's activity box is pinned open. The texts part at token 1; word edit distance 0.94; loudness −13.1 DUFS.">
+        <img src="img/hero.webp" width="2000" height="1250" alt="Abliteration Lens after a run: the token timeline at the top, the original and diverged texts side by side with the words only one has marked, and below them the desk: the Instrument, then vShrink, vLookback, vRotate and vBands strips at layer 6, a Level meter, and the vLookback's activity box pinned open at 43% for step 3 of 50.">
+        <span class="zoom">Zoom</span>
+      </a>
+    </figure>
+    <div class="stats" aria-label="Abliteration Lens in figures">
+      <div><b>12 × 12</b><span>Blocks and heads in GPT-2 small, the default</span></div>
+      <div><b>23</b><span>Strips of the bench's own, meters included</span></div>
+      <div><b>16</b><span>VAU units, effects and meters</span></div>
+      <div><b>7</b><span>Views, from the Bench to the Variorum</span></div>
+      <div><b>DUFS</b><span>Loudness of the change, at the output</span></div>
+      <div><b>127.0.0.1</b><span>The only address it listens on</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="content" id="main">
+
+  <div class="wrap toc-strip" aria-label="On this page">
+    <a href="#what">Overview</a><a href="#desk">The desk</a><a href="#how">How it works</a><a href="#metaphor">Limits of the metaphor</a><a href="#units">Units available</a><a href="#views">Views</a><a href="#recipes">Recipes</a><a href="#holes">Rabbit holes</a><a href="#tips">Tips</a><a href="#start">Getting started</a><a href="#vau">VAU</a><a href="#credits">Credits</a>
+  </div>
+
+  <!-- 01 -->
+  <section class="section wrap reveal" id="what">
+    <span class="num">01</span>
+    <h2>Overview</h2>
+    <p class="lede">Abliteration Lens loads an open-weight language model (GPT-2 small by default) and changes how its forward pass runs while it writes. Each change is a strip on a desk: knobs, a fader, a power light and a small activity meter. A run makes two texts from one prompt and one seed. The <b>original</b> comes from the unchanged model. The <b>diverged</b> text comes from the model with the chain of strips in place. Because the seed, the sampler and the code path are the same for both, the chain is the only difference between them.</p>
+    <p>The strips ablate a head or an MLP, scale a component, steer the residual stream along a direction, project a direction out, add noise, coarsen a block's weights, reorder the blocks, transplant the stream from another prompt, bend the embeddings, vocode one prompt's band levels onto another, pan attention toward recent tokens or toward the start, and rewrite one fact with a rank-one edit to an MLP (inspired by ROME); the <a href="strips.html">Strips page</a> shows each one with a figure of what its code computes. Beside them sit the VAUs, <a href="https://vector-lab-tools.github.io/vector-abliteration-units/">Vector Abliteration Units</a> from VAU's Core Collection, each named with the collection's prefix and drawn on a card in its look: the effects vShrink, vSquash, vLookback, vAverage, vQuantise, vRotate, vBands, vSparsify, vRepeat, vBandshrink and vClamp, the interventions vAbliterate and vNeuron, the fitted unit vMorph, and the meter units vEntropy and vPeak share.</p>
+    <p>Meters read the model as it goes: the logit lens (Tap), the stream's size (Level), its reach along a direction (Direction meter), one head's attention (Attention scope), and in the desk's OUT column the loudness of the whole change at the output, in DUFS. Every run is kept with its recipe, so it can be run again and checked.</p>
+    <p><b>On the word “abliteration”.</b> In the interpretability literature, abliteration means removing a refusal direction from a model (<a href="https://arxiv.org/abs/2406.11717">Arditi et al. 2024</a>; <a href="https://huggingface.co/blog/mlabonne/abliteration">Labonne 2024</a>). Abliteration Lens uses the word in an extended sense. Its default model, GPT-2 small, was never trained to refuse, and most of its strips (noise, block reordering, attention panning, the effects) remove no direction at all. It is an active divergence instrument (<a href="https://arxiv.org/abs/2107.05599">Broad et al. 2021</a>), in which ablation is one strip among many. <a href="abliteration.html">What is abliteration?</a> says what that does to text, with real runs set beside the original.</p>
+
+    <div class="viz" id="viz-part" role="group" aria-label="Animated figure: two texts written from the same seed, identical for fourteen tokens, parting at token fifteen">
+      <svg viewBox="0 0 960 300" aria-hidden="true"></svg>
+      <div class="bar"><span class="lab">Two takes, one seed</span><button type="button" data-act="replay">Replay</button><button type="button" data-act="pause" aria-pressed="false">Pause</button></div>
+    </div>
+    <p class="viz-cap"><b>Dry and wet.</b> A real run on GPT-2 small, prompt “What matters about the archive is”, seed 42. The chain (a mean ablation of head 5.1, a Steer from step 10, a Project out at layer 10 and a Rewrite at block 5) acts from the first step, the Steer from step 10, and the two runs still write the same fourteen tokens. At token 15 the original writes “ history” (p 0.039) and the diverged run writes “ book” (p 0.051). Both runs draw from the same seeded random sequence, so once the chain has moved the distribution far enough, the same draw lands on another word, and every token after it is read from a different text.</p>
+  </section>
+
+  <!-- 02 -->
+  <section class="section wrap reveal" id="desk">
+    <span class="num">02</span>
+    <h2>The desk</h2>
+    <p>The dock at the foot of the window holds the <b>Instrument</b> (the model, the prompt it plays, the sampler's knobs and the seed) and then the strips, left to right, in the order they act. Above it the <b>Arrangement</b> shows the two texts with a timeline of tokens and a playhead; the meters on the desk follow the playhead. <b>Replay</b> (▶, beside the texts) writes the two texts out again side by side, token by token, at the tempo set under it: live, or 24, 12, 6 or 3 tokens a second. A browser on the left lists the interventions, the VAUs by collection, meters, directions and saved chains: drag one onto the desk, or double-click it.</p>
+
+    <div class="clips">
+      <figure class="clip tilt" style="--w:300px;--mw:380px">
+        <a class="shot" href="img/c-instrument.webp" data-cap="The Instrument: GPT-2 small, the prompt, temperature 0.8, top-k 40, top-p 0.95, 50 tokens, seed 42."><img src="img/c-instrument.webp" width="544" height="914" loading="lazy" alt="The Instrument panel: the model box reading openai-community/gpt2, the prompt 'What matters about the archive is', four knobs for temperature 0.8, top-k 40, top-p 0.95 and tokens 50, and the seed 42 with arrows either side."></a>
+        <figcaption><span class="tag">Instrument</span>What the model plays: the prompt, and the sampler's knobs. The seed is the take.</figcaption>
+      </figure>
+      <figure class="clip blue tilt2" style="--w:260px;--mw:330px">
+        <a class="shot" href="img/c-activity.webp" data-cap="The vLookback's activity box, pinned open: 43% at step 3 of 50, average 63%, peak 77% at step 35, acting at 50 of 50 steps. The self-repair line reads 10.8 vB louder through the rest of the model than straight to the output."><img src="img/c-activity.webp" width="504" height="842" loading="lazy" alt="The vLookback strip's activity box: 43% at step 3 of 50 in large type, a bar chart of every step, average 63%, peak 77% at step 35, and a paragraph on self-repair."></a>
+        <figcaption><span class="tag">Activity</span>How much a strip changed what it touched, step by step. Click the four-bar meter on a strip to pin this open.</figcaption>
+      </figure>
+      <figure class="clip green" style="--w:110px;--mw:150px">
+        <a class="shot" href="img/c-out.webp" data-cap="The OUT column: the loudness of the chain at the output. This chain (vSparsify, vRepeat, vBandshrink, vClamp) integrates to −17.7 DUFS."><img src="img/c-out.webp" width="76" height="896" loading="lazy" alt="The tall OUT loudness meter, an amber bar with a white short-term line and a red peak tick, reading −17.7 DUFS."></a>
+        <figcaption><span class="tag">OUT</span>The master meter, in DUFS: how far the chain moves the next-token distribution.</figcaption>
+      </figure>
+    </div>
+
+    <div class="clips">
+      <figure class="clip red wide">
+        <a class="shot" href="img/bench-part-late.webp" data-cap="The run from the Overview: a mean ablation of head 5.1, a Steer from step 10, a Project out at layer 10 and a Rewrite at block 5. The timeline marks where the texts part, at token 15; word edit distance 0.69; −17.1 DUFS."><img src="img/c-part15.webp" width="2344" height="144" loading="lazy" alt="The token timeline: two rows, Original and Diverged, identical for fourteen tokens, then a red mark labelled parts at token 15, where 'his(tory)' and 'boo(k)' sit in a box."></a>
+        <figcaption><span class="tag">Timeline</span>Where the takes part. Click or drag on it, or use the arrow keys, and every meter on the desk shows that step.</figcaption>
+      </figure>
+    </div>
+
+    <div class="clips">
+      <figure class="clip green" style="--w:170px;--mw:220px">
+        <a class="shot" href="img/c-qhelp.webp" data-cap="The help button at the end of a unit's name on its strip, here the vShrink's. Click it, or press Enter on it, to open the unit's help page."><img src="img/c-qhelp.webp" width="260" height="123" loading="lazy" alt="The head of the vShrink strip: its power light, the number 1, the name vShrink with a small help button after it, the activity meter, and the target menu below."></a>
+        <figcaption><span class="tag">Help page</span>Every unit's strip opens its help page from a button after its name.</figcaption>
+      </figure>
+      <figure class="clip blue" style="--w:380px;--mw:480px">
+        <a class="shot" href="img/c-help-unit.webp" data-cap="The vLookback's help page, opened from its strip: what it does; the animated figure of what its code computes, here at time 4, feedback 0.3 and mix 0.5, with position 12 drawing on positions 8 and 4; GPT-2 small's text at that setting, the words that differ from the original marked; and each parameter with its range, default and tip. Esc closes it."><img src="img/c-help-unit.webp" width="1400" height="2229" loading="lazy" alt="The vLookback's help box: the line 'Adds the stream from some positions back: an echo, with feedback', a row of positions with arcs from 8 and 4 to position 12, the readout h'[12] = h[12] + 0.50·h[8] + 0.15·h[4], the chain line delay layer=6 time=4 feedback=0.3 mix=0.5 over the diverged text with its changed words in green, a caption, and a table of the parameters Time, Feedback and Mix with their ranges and tips."></a>
+        <figcaption><span class="tag">Unit help</span>The figure, the example texts and the parameters' tips come from the installed <code>vau</code> package, as on the <a href="https://vector-lab-tools.github.io/vector-abliteration-units/units.html">VAU units page</a>.</figcaption>
+      </figure>
+    </div>
+
+    <div class="inset">
+      <a class="screen shot" href="img/bench-steer-meters.webp" data-cap="A mean ablation of head 5.1 and a Steer along negation at layer 6, scale 4, with three meters after them: a Tap at layer 8, an Attention scope on head 5.1 and a Direction meter at layer 6. Loudness −8.8 DUFS."><img src="img/bench-steer-meters.webp" width="1600" height="1000" loading="lazy" alt="The Bench with Ablate, Steer, Tap, Attention scope and Direction meter strips; the texts part at token 1."><span class="zoom">Zoom</span></a>
+      <figure class="detail clip">
+        <a class="shot" href="img/c-tap.webp" data-cap="The Tap at layer 8, step 1: the logit lens. With the chain, the stream at layer 8 points to “ anymore” at 0.97; without it, to “ not” at 0.53."><img src="img/c-tap.webp" width="352" height="854" loading="lazy" alt="The Tap strip: step 1 of 50; diverged top words anymore 0.97, anybody 0.01; original top words not 0.53, how 0.31, what 0.04, whether 0.03."></a>
+      </figure>
+    </div>
+    <p class="viz-cap" style="margin-top:0"><b>Meters after strips.</b> A Steer along the negation direction at layer 6, scale 4. The Tap at layer 8 reads the logit lens at step 1: the unchanged stream points to “ not” (0.53); the steered stream points to “ anymore” (0.97). The Direction meter beside it reads 80.8 along the direction with the chain, −7.8 without.</p>
+  </section>
+
+  <!-- 03 -->
+  <section class="section wrap reveal" id="how">
+    <span class="num">03</span>
+    <h2>How it works</h2>
+    <p class="lede">The studio is a way into the mechanics, and parts of it fit closely. Each deep dive below starts from a piece of studio kit and says what the model has in its place. The places where the comparison fails are gathered at the end, under Limits of the metaphor.</p>
+
+    <div class="mapping" aria-label="The studio and the model, side by side">
+      <div class="row"><span class="studio">The instrument</span><span class="arrow">→</span><span class="model">The model, with the prompt it plays and the sampler that picks each token</span></div>
+      <div class="row"><span class="studio">A take</span><span class="arrow">→</span><span class="model">The seed. The same seed, model and chain give the same text, every time</span></div>
+      <div class="row"><span class="studio">Dry and wet</span><span class="arrow">→</span><span class="model">The original text and the diverged text</span></div>
+      <div class="row"><span class="studio">The signal bus</span><span class="arrow">→</span><span class="model">The residual stream: one vector per token, 768 numbers wide in GPT-2 small, running through every block</span></div>
+      <div class="row"><span class="studio">A channel's insert chain</span><span class="arrow">→</span><span class="model">The chain of strips, worked in order; order matters where two strips touch the same place</span></div>
+      <div class="row"><span class="studio">A frequency band</span><span class="arrow">→</span><span class="model">A direction in the stream, or a band of its principal directions</span></div>
+      <div class="row"><span class="studio">A notch filter</span><span class="arrow">→</span><span class="model">Project out: the part of the stream along a direction removed</span></div>
+      <div class="row"><span class="studio">Time</span><span class="arrow">→</span><span class="model">Positions in the text, one token after another</span></div>
+      <div class="row"><span class="studio">Loudness (LUFS)</span><span class="arrow">→</span><span class="model">DUFS: the KL divergence of the bent model's next-token distribution from the original's, in decibels</span></div>
+      <div class="row"><span class="studio">Soloing a bus mid-chain</span><span class="arrow">→</span><span class="model">The Tap: the logit lens, reading what the output layer would make of the stream at one layer</span></div>
+    </div>
+
+    <h3 id="bus">The signal path</h3>
+    <div class="split">
+      <div>
+        <p>A transformer is a stack of blocks. In GPT-2 small there are 12, each with 12 attention heads and an MLP. The residual stream runs through all of them, and each block reads the stream and adds two things back onto it: what its attention layer writes, and what its MLP writes. In studio terms the stream is a bus, and every block is a send and return on that bus. Each block adds to the stream, and none replaces it.</p>
+        <p>The bench numbers the places on the bus as Vectorscope and Ablation Bench do. <code>layer=0</code> is the token and position embeddings entering block 0; <code>layer=6</code> is the stream after block 5. A strip at <code>layer=6</code> sits between blocks 5 and 6 and changes what every later block reads. Strips can also sit on a component: <code>head=5.1</code>, <code>attn=5</code>, <code>mlp=5</code>, <code>block=5</code>.</p>
+      </div>
+      <div>
+        <p>The figure runs tokens through the 12 blocks with one strip inserted. Toggle the power light, or move the insert point, and watch what reaches the output.</p>
+        <p>The strip here is a Steer along the negation direction at scale 4. A green dot marks a Tap at layer 8, a meter that reads the stream there without changing it.</p>
+      </div>
+    </div>
+    <div class="viz" id="viz-bus" role="group" aria-label="Animated figure: tokens flowing along the residual stream through twelve blocks, with a strip inserted at a chosen layer">
+      <svg viewBox="0 0 960 340" aria-hidden="true"></svg>
+      <div class="bar"><span class="lab">The bus</span>
+        <label>layer <input type="range" min="1" max="12" value="6" data-k="layer"><output>6</output></label>
+        <button type="button" data-act="power" aria-pressed="true">Strip on</button></div>
+      <div class="readout" aria-live="polite"></div>
+    </div>
+    <p class="viz-cap"><b>Readout values</b> come from a real Tap at layer 8, step 1, after a mean ablation of head 5.1 and a Steer along negation at layer 6, scale 4. They are fixed in the figure; moving the insert point changes where the colour changes, not the numbers.</p>
+
+    <h3 id="direction">Directions as bands, Project out as a notch</h3>
+    <div class="split">
+      <div>
+        <p>A <b>direction</b> is a vector in the stream, one per layer. The bench makes them from two lists of texts (the difference of their mean streams, as Vectorscope's Grammar Steering does, or by PCA, inspired by repeng), from one word as the output layer writes it, from a passage against the reference corpus, or from where the model is about to write a word, which is how Arditi et al. read the refusal direction.</p>
+        <p>Treat a direction like a band on an equaliser. <b>Steer</b> boosts it: <code>steer layer=6 dir=negation scale=4</code> adds 4 × the direction at every token. <b>Project out</b> is a notch: <code>project layer=all dir=negation mode=remove</code> takes away the part of the stream that points along the direction and keeps the rest. <code>mode=reflect</code> flips that part, as a polarity switch does. <code>to=mean</code> sets it to its ordinary level over the reference corpus instead of to zero, a gentler cut.</p>
+        <p>In the figure the white arrow is the stream at one token, the amber line the direction. The amber segment is the stream's component along it, the part a notch removes.</p>
+      </div>
+      <div>
+        <div class="viz" id="viz-proj" role="group" aria-label="Animated figure: a vector projected off a direction, reflected across it, or pushed along it">
+          <svg viewBox="0 0 520 360" aria-hidden="true"></svg>
+          <div class="bar"><span class="lab">Mode</span>
+            <button type="button" data-mode="remove" aria-pressed="true">remove</button>
+            <button type="button" data-mode="reflect" aria-pressed="false">reflect</button>
+            <button type="button" data-mode="steer" aria-pressed="false">steer +4</button></div>
+          <div class="readout" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 id="eq">Bands of principal directions</h3>
+    <p>Some units borrow the idea of frequency more literally. The bench measures each layer's <b>principal directions</b> over a reference corpus with the model unchanged: the directions along which ordinary text spreads most, ranked by that spread. <b>vBands</b> treats the first 8 as its low band, 9 to 64 as its mid band and the rest (65 to 768 in GPT-2) as its high band, and scales each band about the stream's mean: <code>x = h − μ; h' = h + (low − 1) · x V₁₋₈ᵀ V₁₋₈</code>, and so on for the others. <b>vBandshrink</b> compresses each band separately, and the <b>Vocoder</b> imposes one prompt's band levels on the text being written, with bands spaced logarithmically, narrow among the largest directions and wide in the tail, as a vocoder's bands are over frequency.</p>
+    <div class="viz" id="viz-eq" role="group" aria-label="Interactive figure: the stream's spread along its principal directions, divided into low, mid and high bands that the vBands knobs scale">
+      <svg viewBox="0 0 960 260" aria-hidden="true"></svg>
+      <div class="bar"><span class="lab">vBands at layer 6</span>
+        <label>low <input type="range" min="0" max="2" step="0.05" value="1.6" data-k="low"><output>1.6</output></label>
+        <label>mid <input type="range" min="0" max="2" step="0.05" value="1" data-k="mid"><output>1</output></label>
+        <label>high <input type="range" min="0" max="2" step="0.05" value="0.4" data-k="high"><output>0.4</output></label></div>
+    </div>
+    <p class="viz-cap"><b>The shape is a sketch.</b> The bars fall off as spread along ranked principal directions does; the band edges (8 and 64 of 768) are the unit's own. The knobs start at the settings of a run on this page (low 1.6, high 0.4, with a vSquash, a vLookback and a vAverage on the same layer), which made GPT-2 write “more more more” for fifty tokens at −4.1 DUFS (see the rabbit holes).</p>
+
+    <h3 id="time">Time in vLookback, vAverage and vRepeat</h3>
+    <div class="split">
+      <div>
+        <p>In a language model, time is position. The text is written one token at a time, and at each position the stream holds that token's state. The time-based units act along that axis, on the stream at one layer.</p>
+        <ul>
+          <li><b>vLookback</b> adds the stream from <code>time</code> positions back, with feedback: <code>line[p] = h[p] + feedback · line[p − time]</code>, then <code>h'[p] = h[p] + mix · line[p − time]</code>. An echo in tokens.</li>
+          <li><b>vAverage</b> adds a decaying average of every earlier position: <code>tail[p] = decay · tail[p − 1] + (1 − decay) · h[p]</code>.</li>
+          <li><b>vRepeat</b> takes positions in runs of <code>interval</code> and replays the stream of the few positions before over the last <code>length</code> of each run: a stutter.</li>
+          <li><b>vQuantise</b>'s <code>hold</code> keeps the first position of each run of positions over the rest of the run, a sample-and-hold.</li>
+        </ul>
+        <p>The first position, where models park attention (the attention sink), is left alone: these units neither change it nor draw on it. Causality holds too. A position can only take from earlier positions, so an echo never arrives from the future.</p>
+      </div>
+      <div>
+        <div class="viz" id="viz-time" role="group" aria-label="Animated figure: a row of token positions with a playhead; arrows show which earlier positions vLookback, vAverage or vRepeat draw on">
+          <svg viewBox="0 0 520 230" aria-hidden="true"></svg>
+          <div class="bar"><span class="lab">Unit</span>
+            <button type="button" data-mode="delay" aria-pressed="true">delay</button>
+            <button type="button" data-mode="reverb" aria-pressed="false">reverb</button>
+            <button type="button" data-mode="beatrepeat" aria-pressed="false">beat repeat</button></div>
+          <div class="readout" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 id="envelope">Envelope over depth</h3>
+    <div class="split">
+      <div>
+        <p>A line that names several layers (<code>layer=all</code>, or <code>block=all</code> for vAbliterate and vMorph) can weigh its change by depth. Every VAU unit, and the bench's own Steer, Project out, Noise and Scale on the stream, takes an envelope from the host: <b>linear</b> tapers in a straight line (as Heretic's kernel does), <b>bell</b> along a Gaussian (as OBLITERATUS weights it), <b>flat</b> is the same within reach. <code>epeak</code>, <code>ewidth</code> and <code>eedge</code> are shares of the depth: where it peaks, how far it reaches either side, and its value at the edge of the reach.</p>
+        <p>In studio terms this is automation, drawn over the depth of the model instead of over time. Time has its own automation: the <b>window</b>, <code>wfrom</code> and <code>wto</code>, makes a strip act only from one step to another. <code>wfrom=10</code> is a Steer that comes in at token 10.</p>
+        <div class="term"><div class="label"><span>A chain line with host features</span></div><pre><code>gate layer=all keep=0.6 wet=0.8 env=bell epeak=0.6 ewidth=0.3 eedge=0.2 wfrom=10</code></pre></div>
+      </div>
+      <div>
+        <div class="viz" id="viz-env" role="group" aria-label="Interactive figure: the envelope over the depth of the model, one bar per layer">
+          <svg viewBox="0 0 520 280" aria-hidden="true"></svg>
+          <div class="bar"><span class="lab">env</span>
+            <button type="button" data-shape="bell" aria-pressed="true">bell</button>
+            <button type="button" data-shape="linear" aria-pressed="false">linear</button>
+            <button type="button" data-shape="flat" aria-pressed="false">flat</button></div>
+          <div class="bar">
+            <label>peak <input type="range" min="0" max="1" step="0.01" value="0.6" data-k="peak"><output>0.6</output></label>
+            <label>width <input type="range" min="0.05" max="1" step="0.01" value="0.3" data-k="width"><output>0.3</output></label>
+            <label>edge <input type="range" min="0" max="1" step="0.01" value="0.2" data-k="edge"><output>0.2</output></label></div>
+        </div>
+      </div>
+    </div>
+    <p class="viz-cap"><b>The curve is computed</b> with the host's own formula (<code>vau.hostfx.envelope</code>) over the 13 places of GPT-2 small's stream; the values start at the settings of the vSparsify in the host features screenshot below. Leave the sliders alone and the peak sweeps the depth by itself.</p>
+
+    <div class="clips">
+      <figure class="clip" style="--w:200px;--mw:250px">
+        <a class="shot" href="img/host.webp" data-cap="A vSparsify on every layer with wet 0.8, a bell envelope (peak 0.6, width 0.3, edge 0.2) and a window from step 10; a vRotate rotating the stream 60° from negation toward not-x-but-y, with a random control (seed 3). Loudness −26.5 DUFS."><img src="img/c-host-strips.webp" width="560" height="1620" loading="lazy" alt="Two strips with their Host sections unfolded: the vSparsify with Wet 0.8, Envelope bell, Peak 0.6, Width 0.3, Edge 0.2, From step 10; the vRotate with Control random and Control seed 3."></a>
+        <figcaption><span class="tag">Host features</span>Wet, envelope, keep size, window and a random control, folded under Host on every unit's strip.</figcaption>
+      </figure>
+      <figure class="clip blue" style="--w:360px;--mw:520px">
+        <a class="shot" href="img/c-knob-tip.webp" data-cap="Rest the pointer on a knob and a small tip gives its name and range, here vBands' Low, 0 to 2; the info bar at the foot of the window gives the full tip, for Low x = h − μ; h' = h + (low − 1) · x V₁₋₈ᵀ V₁₋₈."><img src="img/c-knob-tip.webp" width="854" height="840" loading="lazy" alt="The vLookback, vBands and vAverage strips with a small tooltip beside vBands' Low knob reading Low · 0 to 2."></a>
+        <figcaption><span class="tag">Knob tip</span>A knob's tip gives its name and range; the info bar gives the full tip, one line written as a formula where the change is one. VAU requires a tip for every parameter.</figcaption>
+      </figure>
+      <figure class="clip green" style="--w:320px;--mw:460px">
+        <a class="shot" href="img/c-help-host.webp" data-cap="The Help box's page on host features, with the finding from the build: for a Steer, a random control of the same size is as loud; for a Project out, it is much quieter."><img src="img/c-help-host.webp" width="2080" height="1560" loading="lazy" alt="The Help box open at Host features: Wet, Envelope, Keep size, Window and Control, each described, then a paragraph of findings with negation rates per 1,000 words."></a>
+        <figcaption><span class="tag">Help</span>The ? box explains every strip and measure, with numbers from the build.</figcaption>
+      </figure>
+    </div>
+
+    <h3 id="loudness">Loudness in DUFS</h3>
+    <div class="split">
+      <div>
+        <p>The OUT column's meter answers one question: how far does the chain move what the model expects next? At each step, both models give a distribution over the next token on the same text. The reading is the KL divergence of the diverged model's distribution from the original's, in bits: the extra bits per token it costs to code the original's next token with the bent model's expectations.</p>
+        <p>For small changes the KL grows with the square of the change in the logits, as power grows with the square of an amplitude, so it goes into decibels with 10 log₁₀, the way LUFS puts mean square. Full scale is log₂ of the vocabulary, 15.6 bits for GPT-2's 50,257 tokens:</p>
+        <div class="term"><div class="label"><span>Divergence Units relative to Full Scale</span></div><pre><code>DUFS = 10 · log₁₀( KL / log₂ V )</code></pre></div>
+        <p>So 0 DUFS is a KL of 15.6 bits, −10 a tenth of it, −20 a hundredth. Ratios of two loudnesses are in <b>vecibels</b> (vB), named so that nobody takes them for sound. The meter gives <b>momentary</b> (one step, the bar; green below −30, amber to −12, red above), <b>short-term</b> (the last 8 steps, the white line), <b>integrated</b> (the whole text, gated as ITU-R BS.1770 gates loudness), <b>range</b> and <b>peak</b>.</p>
+        <p>The meter reads the original text, which is the same whatever the chain, so two chains' readings compare directly. Mean-ablating head 5.1 of GPT-2 reads about −33 DUFS on the archive prompt; a Steer along negation at layer 6 reads about −15 at scale 2 and −5 at scale 8.</p>
+      </div>
+      <div>
+        <div class="viz" id="viz-dufs" role="group" aria-label="Animated figure: a loudness meter in DUFS with a converter from KL in bits">
+          <svg viewBox="0 0 520 380" aria-hidden="true"></svg>
+          <div class="bar"><span class="lab">KL at one step</span>
+            <label><input type="range" min="-5" max="1" step="0.01" value="-1" data-k="kl"><output>0.10</output> bits</label></div>
+          <div class="readout" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 id="meters">Meters and the logit lens <span class="meterbadge" title="A meter: it reads the model and leaves it unchanged">meter</span></h3>
+    <p>Four strips read the model and leave it unchanged: Tap, Level meter, Direction meter and Attention scope. The desk marks each with a <span class="meterbadge" title="A meter: it reads the model and leaves it unchanged">meter</span> badge after its name, and the meter units vEntropy and vPeak share too, so a meter is never taken for an effect that does nothing. They register no hook while the texts are written; after the run, one more teacher-forced pass over each text fills them in, over the original text with the meters alone and over the diverged text with the whole chain. A meter placed after a strip on the same layer reads the stream after that strip.</p>
+    <div class="clips">
+      <figure class="clip" style="--w:280px;--mw:360px">
+        <a class="shot" href="img/meters.webp" data-cap="Meter units on the desk: vEntropy and vPeak share either side of a vClamp, with a vNeuron strip. At step 8 the vEntropy meter reads 5.38 bits for the diverged text and 8.12 for the original. Loudness −13.2 DUFS."><img src="img/c-entropy.webp" width="428" height="955" loading="lazy" alt="The vEntropy strip: step 8 of 50, diverged 5.38 bits, original 8.12 bits, a line over every step."></a>
+        <figcaption><span class="tag">vEntropy (unit)</span>Uncertainty about the next token, in bits, for each text.</figcaption>
+      </figure>
+      <figure class="clip blue" style="--w:200px;--mw:240px">
+        <a class="shot" href="img/c-gauge.webp" data-cap="The Direction meter at layer 6, step 1: 80.8 along negation with the chain (cosine 0.74), −7.8 without (cosine −0.11)."><img src="img/c-gauge.webp" width="352" height="854" loading="lazy" alt="The Direction meter strip on negation at layer 6: diverged along 80.8, cosine 0.74; original along −7.8, cosine −0.11."></a>
+        <figcaption><span class="tag">Direction meter</span>How far the stream points along a direction. After a Project out it should read near zero.</figcaption>
+      </figure>
+      <figure class="clip green" style="--w:200px;--mw:240px">
+        <a class="shot" href="img/c-tap.webp" data-cap="The Tap: the logit lens at layer 8. What would the output layer write if the stream stopped here?"><img src="img/c-tap.webp" width="352" height="854" loading="lazy" alt="The Tap strip at layer 8, listing the top four words for each text."></a>
+        <figcaption><span class="tag">Tap</span>The logit lens: the stream at a layer pushed through the final norm and the output layer.</figcaption>
+      </figure>
+    </div>
+
+    <h3 id="metaphor">Limits of the metaphor</h3>
+    <div class="note break"><span class="tag">Breaks</span><p><b>A direction is not a frequency.</b> Frequencies are ordered and orthogonal; directions made from contrast sets overlap, and nothing orders them. vBands' low, mid and high are principal directions ranked by how far ordinary text spreads along them, and “low” means “largest spread”, nothing to do with pitch.</p></div>
+    <div class="note break"><span class="tag">Breaks</span><p><b>The output feeds the input.</b> A track does not hear its own effects. Here every diverged token becomes part of what the model reads next, so a change that flips one token changes every step after it. A small wet setting does not give a text halfway between dry and wet; the text is discrete, and a single flipped token sends it elsewhere.</p></div>
+    <div class="note break"><span class="tag">Breaks</span><p><b>Loudness is a distance from the dry signal.</b> DUFS measures how far two distributions are apart, never how much energy there is. A chain that changes nothing reads silent, however busy its strips. It is always relative to the original.</p></div>
+    <div class="note break"><span class="tag">Breaks</span><p><b>Later layers answer back.</b> On a desk, the inserts after a compressor leave its output as it is. In a model, later blocks can damp a strip's change or carry it further (the Hydra effect, McGrath et al. 2023). The activity box ends with a <b>self-repair</b> reading, in vB, for this: below 0 the later layers damp the strip's change; above 0 most of its effect runs through them.</p></div>
+    <div class="note break"><span class="tag">Breaks</span><p><b>A take repeats exactly.</b> A performer never plays the same take twice. A seed does: same model, same chain, same seed, same text, and the tool checks this when it regenerates a recipe. The <b>control band</b> stands in for the variation between takes, by reseeding the original n times.</p></div>
+    <div class="note break"><span class="tag">Breaks</span><p><b>Positions are not samples.</b> A delay of 4 is four tokens, whatever their length. Each position is a 768-number state, and the model looks back over every earlier one through attention, which no audio buffer does.</p></div>
+  </section>
+
+  <!-- 04 -->
+  <section class="section wrap reveal" id="units">
+    <span class="num">04</span>
+    <h2>Vector Abliteration Units Available</h2>
+    <p>The effects, unit interventions, fitted units and meter units are <a href="https://vector-lab-tools.github.io/vector-abliteration-units/">Vector Abliteration Units</a> (VAUs) from VAU's Core Collection, installed as the Python package <code>vau</code>; the browser lists them under VAUs, by collection. Each is one file with a manifest; the desk, the browser, the Help box and the Code view are built from it. The tips below are the units' own, as the desk shows them on hover.</p>
+    <p class="unit-desk-note">Each strip as the desk draws it, at the unit's example line after a run of GPT-2 small (“What matters about the archive is”, 50 tokens, seed 42); each opens the unit's help page. Scroll along the row for all sixteen, and click a strip to see it larger.</p>
+    <div class="unit-desk" tabindex="0" aria-label="The sixteen units' strips; scroll sideways for more">
+        <figure class="ucard">
+          <a class="shot" href="img/strips/compressor.webp" data-cap="vShrink after a run of GPT-2 small at compressor layer=6 thresh=1 ratio=4: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/compressor.webp" width="264" height="854" loading="lazy" alt="The vShrink strip in Abliteration Lens at compressor layer=6 thresh=1 ratio=4, after a run of GPT-2 small."></a>
+          <figcaption><b>vShrink</b> <code class="uid">compressor</code><span class="uwhat">Above a threshold, reduces the stream's size at each position by a ratio</span><code class="utip">n &gt; T:  n' = T + (n − T) / ratio</code></figcaption>
+        </figure>
+        <figure class="ucard">
+          <a class="shot" href="img/strips/saturator.webp" data-cap="vSquash after a run of GPT-2 small at saturator layer=6 drive=2: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/saturator.webp" width="264" height="854" loading="lazy" alt="The vSquash strip in Abliteration Lens at saturator layer=6 drive=2, after a run of GPT-2 small."></a>
+          <figcaption><b>vSquash</b> <code class="uid">saturator</code><span class="uwhat">Soft-clips each dimension, harder as the drive rises</span><code class="utip">h' = (1 − mix)·h + mix · L·tanh(h / L)</code></figcaption>
+        </figure>
+        <figure class="ucard">
+          <a class="shot" href="img/strips/delay.webp" data-cap="vLookback after a run of GPT-2 small at delay layer=6 time=4 feedback=0.3 mix=0.5: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/delay.webp" width="264" height="854" loading="lazy" alt="The vLookback strip in Abliteration Lens at delay layer=6 time=4 feedback=0.3 mix=0.5, after a run of GPT-2 small."></a>
+          <figcaption><b>vLookback</b> <code class="uid">delay</code><span class="uwhat">Adds the stream from some positions back, with feedback</span><code class="utip">h'[p] = h[p] + mix · line[p − time]</code></figcaption>
+        </figure>
+        <figure class="ucard">
+          <a class="shot" href="img/strips/reverb.webp" data-cap="vAverage after a run of GPT-2 small at reverb layer=6 decay=0.8 mix=0.5: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/reverb.webp" width="264" height="854" loading="lazy" alt="The vAverage strip in Abliteration Lens at reverb layer=6 decay=0.8 mix=0.5, after a run of GPT-2 small."></a>
+          <figcaption><b>vAverage</b> <code class="uid">reverb</code><span class="uwhat">Adds a decaying average of the earlier positions</span><code class="utip">h'[p] = h[p] + mix · tail[p − 1]</code></figcaption>
+        </figure>
+        <figure class="ucard">
+          <a class="shot" href="img/strips/erosion.webp" data-cap="vQuantise after a run of GPT-2 small at erosion layer=6 bits=4: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/erosion.webp" width="264" height="854" loading="lazy" alt="The vQuantise strip in Abliteration Lens at erosion layer=6 bits=4, after a run of GPT-2 small."></a>
+          <figcaption><b>vQuantise</b> <code class="uid">erosion</code><span class="uwhat">Quantises the stream to few levels, or holds it over several positions</span><code class="utip">h' = round(h / s) · s,  s = 6σ / 2^bits</code></figcaption>
+        </figure>
+        <figure class="ucard">
+          <a class="shot" href="img/strips/shifter.webp" data-cap="vRotate after a run of GPT-2 small at shifter layer=6 dir=negation dir2=not-x-but-y angle=90: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/shifter.webp" width="264" height="921" loading="lazy" alt="The vRotate strip in Abliteration Lens at shifter layer=6 dir=negation dir2=not-x-but-y angle=90, after a run of GPT-2 small."></a>
+          <figcaption><b>vRotate</b> <code class="uid">shifter</code><span class="uwhat">Rotates the stream in the plane of two directions</span><code class="utip">(h·e₁, h·e₂) rotated by angle°</code></figcaption>
+        </figure>
+        <figure class="ucard">
+          <a class="shot" href="img/strips/eq.webp" data-cap="vBands after a run of GPT-2 small at eq layer=6 low=1 mid=1 high=1: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/eq.webp" width="264" height="854" loading="lazy" alt="The vBands strip in Abliteration Lens at eq layer=6 low=1 mid=1 high=1, after a run of GPT-2 small."></a>
+          <figcaption><b>vBands</b> <code class="uid">eq</code><span class="uwhat">Scales three bands of the stream's principal directions</span><code class="utip">h' = h + (low − 1) · x V₁₋₈ᵀ V₁₋₈</code></figcaption>
+        </figure>
+        <figure class="ucard">
+          <a class="shot" href="img/strips/gate.webp" data-cap="vSparsify after a run of GPT-2 small at gate layer=6 keep=0.25: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/gate.webp" width="264" height="854" loading="lazy" alt="The vSparsify strip in Abliteration Lens at gate layer=6 keep=0.25, after a run of GPT-2 small."></a>
+          <figcaption><b>vSparsify</b> <code class="uid">gate</code><span class="uwhat">Keeps each position's largest components and zeroes the rest</span><code class="utip">keep the ⌈keep · d⌉ largest |hᵢ|</code></figcaption>
+        </figure>
+        <figure class="ucard">
+          <a class="shot" href="img/strips/beatrepeat.webp" data-cap="vRepeat after a run of GPT-2 small at beatrepeat layer=6 interval=8 length=2 mix=1: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/beatrepeat.webp" width="264" height="854" loading="lazy" alt="The vRepeat strip in Abliteration Lens at beatrepeat layer=6 interval=8 length=2 mix=1, after a run of GPT-2 small."></a>
+          <figcaption><b>vRepeat</b> <code class="uid">beatrepeat</code><span class="uwhat">Replays the stream of the few positions before over the last few of each run</span><code class="utip">h'[p] = (1 − mix) h[p] + mix · h[p − length]</code></figcaption>
+        </figure>
+        <figure class="ucard">
+          <a class="shot" href="img/strips/multiband.webp" data-cap="vBandshrink after a run of GPT-2 small at multiband layer=6 thresh=1 ratio=4: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/multiband.webp" width="264" height="896" loading="lazy" alt="The vBandshrink strip in Abliteration Lens at multiband layer=6 thresh=1 ratio=4, after a run of GPT-2 small."></a>
+          <figcaption><b>vBandshrink</b> <code class="uid">multiband</code><span class="uwhat">Compresses three bands of principal directions separately</span><code class="utip">L_b = thresh × typical ‖band b‖</code></figcaption>
+        </figure>
+        <figure class="ucard">
+          <a class="shot" href="img/strips/limiter.webp" data-cap="vClamp after a run of GPT-2 small at limiter layer=6 ceiling=0.99: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/limiter.webp" width="264" height="854" loading="lazy" alt="The vClamp strip in Abliteration Lens at limiter layer=6 ceiling=0.99, after a run of GPT-2 small."></a>
+          <figcaption><b>vClamp</b> <code class="uid">limiter</code><span class="uwhat">Clamps each position's largest components at a quantile ceiling</span><code class="utip">L = quantile(|h|, ceiling);  h' = clamp(h, −L, L)</code></figcaption>
+        </figure>
+        <figure class="ucard">
+          <a class="shot" href="img/strips/abliterate.webp" data-cap="vAbliterate after a run of GPT-2 small at abliterate block=all dir=negation strength=1: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/abliterate.webp" width="264" height="1700" loading="lazy" alt="The vAbliterate strip in Abliteration Lens at abliterate block=all dir=negation strength=1, after a run of GPT-2 small."></a>
+          <figcaption><b>vAbliterate</b> <code class="uid">abliterate</code><span class="uwhat">Removes a direction from what attention and MLPs write, strongest at one block</span><code class="utip">y' = (I − s vvᵀ) y</code></figcaption>
+        </figure>
+        <figure class="ucard">
+          <a class="shot" href="img/strips/morph.webp" data-cap="vMorph after a run of GPT-2 small at morph block=all dir=not-x-but-y move=away amount=1: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/morph.webp" width="264" height="1700" loading="lazy" alt="The vMorph strip in Abliteration Lens at morph block=all dir=not-x-but-y move=away amount=1, after a run of GPT-2 small."></a>
+          <figcaption><b>vMorph</b> <code class="uid">morph</code><span class="uwhat">A fitted low-rank change moving one side of a direction's texts toward the other</span><code class="utip">y' = y + amount · (x Aᵀ) Bᵀ</code></figcaption>
+        </figure>
+        <figure class="ucard">
+          <a class="shot" href="img/strips/neuron.webp" data-cap="vNeuron after a run of GPT-2 small at neuron block=5 n=373 op=scale value=1: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/neuron.webp" width="264" height="854" loading="lazy" alt="The vNeuron strip in Abliteration Lens at neuron block=5 n=373 op=scale value=1, after a run of GPT-2 small."></a>
+          <figcaption><b>vNeuron</b> <code class="uid">neuron</code><span class="uwhat">Edits named MLP neurons: scale, add, set, zero, flip, clamp</span><code class="utip">neuron block=11 n=611 op=zero</code></figcaption>
+        </figure>
+        <figure class="ucard wide">
+          <a class="shot" href="img/strips/entropy.webp" data-cap="vEntropy after a run of GPT-2 small at entropy: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/entropy.webp" width="428" height="854" loading="lazy" alt="The vEntropy strip in Abliteration Lens at entropy, after a run of GPT-2 small."></a>
+          <figcaption><b>vEntropy <span class="meterbadge" title="A meter: it reads the model and leaves it unchanged">meter</span></b> <code class="uid">entropy</code><span class="uwhat">How uncertain the model is about the next token, in bits</span><code class="utip">reads the logits</code></figcaption>
+        </figure>
+        <figure class="ucard wide">
+          <a class="shot" href="img/strips/peakshare.webp" data-cap="vPeak share after a run of GPT-2 small at peakshare layer=6 k=8: “What matters about the archive is”, 50 tokens, seed 42."><img src="img/strips/peakshare.webp" width="428" height="955" loading="lazy" alt="The vPeak share strip in Abliteration Lens at peakshare layer=6 k=8, after a run of GPT-2 small."></a>
+          <figcaption><b>vPeak share <span class="meterbadge" title="A meter: it reads the model and leaves it unchanged">meter</span></b> <code class="uid">peakshare</code><span class="uwhat">The share of the stream's size held by its largest components</span><code class="utip">Σ top-k hᵢ² / Σ hᵢ² × 100</code></figcaption>
+        </figure>
+    </div>
+    <div class="shots">
+      <figure>
+        <a class="shot" href="img/bench-new-effects.webp" data-cap="vSparsify at layer 8 (keep 0.5), vRepeat at layer 6 (interval 8, length 2, mix 0.4), vBandshrink (threshold 1.5, ratio 4) and a vClamp (ceiling 0.995). They part at token 3; word edit distance 0.89; −17.7 DUFS. The vSparsify's activity box reads 23% at step 9, average 20%."><img src="img/bench-new-effects.webp" width="1600" height="1000" loading="lazy" alt="The Bench with vSparsify, vRepeat, vBandshrink and vClamp strips; the vSparsify's activity box pinned open; the texts part at token 3."><span class="zoom">Zoom</span></a>
+        <figcaption><b>Dynamics.</b> vSparsify, vRepeat, vBandshrink and vClamp. The diverged text keeps the prompt's register for a while (“that there was a chance at some sort of discovery”) at −17.7 DUFS.</figcaption>
+      </figure>
+      <figure>
+        <a class="shot" href="img/bench-fitted.webp" data-cap="vAbliterate on every block along negation (strength 0.6, bell) and vMorph on every block toward not-x-but-y (amount 0.6). Word edit distance 0.90; −17.0 DUFS. The vMorph's activity box reads 21% at step 11."><img src="img/bench-fitted.webp" width="1600" height="1000" loading="lazy" alt="The Bench with vAbliterate and vMorph strips on every block, the vMorph's activity box pinned open."><span class="zoom">Zoom</span></a>
+        <figcaption><b>Fitted units.</b> vAbliterate and vMorph change what attention and the MLPs write. vMorph is fitted once per setting before the run; this one took 20.8 s.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section class="section wrap reveal" id="views">
+    <span class="num">05</span>
+    <h2>Views</h2>
+    <p>The top bar has seven views: <b>Bench</b>, <b>Probabilities</b>, <b>Dose sweep</b>, <b>Control band</b>, <b>Component map</b>, <b>Directions</b> and <b>Variorum</b>. Every screenshot here is GPT-2 small, prompt “What matters about the archive is”, 50 tokens, seed 42, unless the caption says otherwise.</p>
+
+    <h3>Probabilities</h3>
+    <figure>
+      <a class="shot" href="img/probabilities.webp" data-cap="Probabilities: each text coloured by token probability, under its own model and under the other. Original 5.08 ppl under its own model, 14.18 under the diverged; diverged 13.16 under its own, 59.87 under the original."><img src="img/probabilities.webp" width="1600" height="1000" loading="lazy" alt="The Probabilities view: four panels, each text under its own model and under the other, tokens shaded from no colour to deep red as probability falls."><span class="zoom">Zoom</span></a>
+      <figcaption>Each text coloured by how probable each token was, under its own model and under the other, on LLMbench's scale (no colour at 70% or more). Here the diverged text from a Steer at scale 4 has a perplexity of 13.16 under the model that wrote it and 59.87 under the original: the bent model writes prose the unchanged model finds strange.</figcaption>
+    </figure>
+
+    <h3>Dose sweep</h3>
+    <div class="shots">
+      <figure>
+        <a class="shot" href="img/c-dose-charts.webp" data-cap="A dose sweep of the Steer's scale from 0 to 8 in 9 steps. The red line is the breakdown point, at scale 6."><img src="img/c-dose-charts.webp" width="2716" height="801" loading="lazy" alt="Four small line charts against the Steer's scale from 0 to 8: word edit distance, distinct-2, repetition rate and mean surprisal under the original model, with a red line at 6."><span class="zoom">Zoom</span></a>
+        <figcaption><b>One knob, swept.</b> The Steer's scale from 0 to 8. Distance from the original is 0.40 at scale 1 and near 1 from scale 3. Surprisal under the original model climbs to 295.0 perplexity at scale 6, the breakdown point, then falls.</figcaption>
+      </figure>
+      <figure>
+        <a class="shot" href="img/c-dose-broken.webp" data-cap="The stacked outputs at scales 0 to 8. From scale 7 the text is ellipses; distinct-2 0.020 at scales 7 and 8."><img src="img/c-dose-broken.webp" width="2716" height="1684" loading="lazy" alt="Stacked outputs of the dose sweep, scales 0 to 8: scale 5 still in sentences, scale 6 marked broken and full of ellipses, scales 7 and 8 marked broken and all ellipses."><span class="zoom">Zoom</span></a>
+        <figcaption><b>The outputs, stacked.</b> At scale 8 the text is all ellipses, and its perplexity under the original model drops to 2.96, below the original text's own 5.08. Ellipses are easy to predict once a model is writing them.</figcaption>
+      </figure>
+    </div>
+
+    <h3>Control band</h3>
+    <figure>
+      <a class="shot" href="img/control-band.webp" data-cap="The control band with 8 reseeds. Word edit distance 0.920 lies inside the band (0.848 to 0.958); surprisal under the original model, 5.904 bits, lies far outside (2.432 to 3.420, +8.1 sd)."><img src="img/control-band.webp" width="1600" height="1000" loading="lazy" alt="The Control band view: a table of measures with the diverged value, the band from 8 reseeds, the mean and standard deviation, an inside or outside badge, and a spread plot; below, the reseeded originals."><span class="zoom">Zoom</span></a>
+      <figcaption>The original generated again with 8 other seeds, each measured against the original as the diverged text is. The word edit distance of this Steer (0.920) is <b>inside the band</b> (0.848 to 0.958): another seed moves the words as far. Its surprisal under the original model (5.904 bits) is 8.1 standard deviations outside. Make the band before reading anything into a distance.</figcaption>
+    </figure>
+
+    <h3>Component map and Sweep</h3>
+    <div class="shots">
+      <figure>
+        <a class="shot" href="img/component-map.webp" data-cap="Component map: zero-ablate each of GPT-2 small's 144 heads, three prompts, 40 tokens each, probe: distance from the original. 432 generations in 222.8 s; the largest change 0.890."><img src="img/component-map.webp" width="1600" height="1000" loading="lazy" alt="The Component map view: a 12 by 12 grid of blocks against heads, shaded red by how far zero-ablating each head moves the text."><span class="zoom">Zoom</span></a>
+        <figcaption><b>Component map.</b> Every head zero-ablated in turn over three prompts: 432 generations in 222.8 s. The probe here is distance from the original; it can also be the Grammar Probe's antithesis constructions, counts of hedges, boosters, negation or evaluative words, distinct-2, repetition or surprisal.</figcaption>
+      </figure>
+      <figure>
+        <a class="shot" href="img/c-sweep-grid.webp" data-cap="Sweep: the selected strip (ablate head=5.1 mode=mean) moved across all 144 heads, read teacher-forced on the last run's original text. Loudest head 0.1 at −18.42 DUFS; quietest 7.2 at −55.91. 9.9 s."><img src="img/c-sweep-grid.webp" width="1520" height="755" loading="lazy" alt="The Sweep popup: a grid of loudness in DUFS for mean-ablating every head, green for quiet and orange for loud; head 0.1 stands out at −18."><span class="zoom">Zoom</span></a>
+        <figcaption><b>Sweep.</b> The faster question: how loud is this strip at every place it could go? Nothing is generated, so 144 heads took 9.9 s here. Head 0.1 is loudest (−18.4 DUFS), head 7.2 quietest (−55.9). A click on a cell puts that target on the strip.</figcaption>
+      </figure>
+    </div>
+
+    <h3>Directions and Variorum</h3>
+    <div class="shots">
+      <figure>
+        <a class="shot" href="img/directions.webp" data-cap="Directions: make one from two lists, a word, a passage, where the model decides, or sums of others. The shipped Not X but Y contrast set is loaded (20 + 20)."><img src="img/directions.webp" width="1600" height="1000" loading="lazy" alt="The Directions view: a form with tabs for Two lists, A word, A sentence or passage, Where it decides, and Add and subtract; the Not X but Y contrast set fills the two lists; on the right, the directions on this machine with their norms and separability bars."><span class="zoom">Zoom</span></a>
+        <figcaption><b>Directions.</b> Two contrast sets ship as editable Markdown: Negation and Not X but Y. Directions export and import as llama.cpp control vectors (GGUF).</figcaption>
+      </figure>
+      <figure>
+        <a class="shot" href="img/variorum.webp" data-cap="Variorum: every run kept with its recipe and chain, opened, compared, labelled, exported as Markdown, JSON, a recipe or a bench-kit bundle."><img src="img/variorum.webp" width="1600" height="1000" loading="lazy" alt="The Variorum view: a table of runs with their model, seed, chain, the start of the diverged text and the edit distance."><span class="zoom">Zoom</span></a>
+        <figcaption><b>Variorum.</b> Every run kept as a witness with its recipe. A run made after opening another records it as its parent.</figcaption>
+      </figure>
+      <figure>
+        <a class="shot" href="img/code-view.webp" data-cap="The Code view: the PyTorch hooks the chain registers, line by line, with the hook factories' source after them."><img src="img/code-view.webp" width="1600" height="1000" loading="lazy" alt="The Code view in the dock: comments for each chain line and the register_forward_hook calls for an ablation of head 5.1, a Steer from step 10, a Project out at layer 10 and a Rewrite at block 5."><span class="zoom">Zoom</span></a>
+        <figcaption><b>Code view</b> ({} in the dock). The hooks the chain will register, in order, then their source. The original run registers none.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section class="section wrap reveal" id="recipes">
+    <span class="num">06</span>
+    <h2>Recipes</h2>
+    <p>Chains to type into the text view (≡ in the dock), one strip per line, <code>#</code> to bypass a line. Numbers are from the Help box's findings or from the runs on this page, on GPT-2 small.</p>
+    <div class="cards">
+      <div class="card"><h3>A notch at the decision point</h3>
+        <span class="chain">project layer=10 dir=&lt;decision direction for " not, never, no"&gt; mode=remove</span>
+        <p>Make the direction under Directions ▸ Where it decides. Over four prompts and four seeds, negation words fell from 23 per 1,000 to none at −13 DUFS, with the texts intact.</p></div>
+      <div class="card"><h3>The same notch, set to the mean</h3>
+        <span class="chain">project layer=all dir=&lt;decision&gt; mode=remove to=mean</span>
+        <p>Mean-referenced erasure, as OBLITERATUS offers it. On every layer it kept the texts intact (26 per 1,000, −11.3 DUFS) where removing to zero on every layer collapsed them.</p></div>
+      <div class="card"><h3>Rome</h3>
+        <span class="chain">rewrite block=5 prompt="The Eiffel Tower is located in the city of" subject="Eiffel Tower" target=" Rome"</span>
+        <p>Inspired by ROME. The chance of “ Rome” rises from 0.005 to 0.81; after “The Louvre is located in the city of” it stays at 0.006. Add <code>save=name</code> to keep it as a Patch.</p></div>
+      <div class="card"><h3>Attention panned to the end</h3>
+        <span class="chain">pan block=all depth=4 pan=1</span>
+        <p>Biases attention toward the most recent tokens. Head 5.1's average look-back falls from 19 tokens to 3, and GPT-2 repeats itself.</p></div>
+      <div class="card"><h3>Vocoder, half wet</h3>
+        <span class="chain">vocoder layer=6 prompt="The storm broke over the sea" bands=16 mix=0.5</span>
+        <p>The storm's band levels on the archive's carrier. Mix 0.5 changes the text and keeps it fluent (−20.7 DUFS); mix 1 breaks it apart (−8.6).</p></div>
+      <div class="card"><h3>A late Steer</h3>
+        <span class="chain">steer layer=6 dir=negation scale=2 wfrom=10</span>
+        <p>The window keeps the prompt and the first nine tokens dry. In the run in section 01 it sat with three other strips, and the texts shared fourteen tokens before they parted.</p></div>
+      <div class="card"><h3>A Steer and its random control</h3>
+        <span class="chain">steer layer=6 dir=&lt;decision&gt; scale=1
+steer layer=6 dir=&lt;decision&gt; scale=1 control=random cseed=1</span>
+        <p>Run each on its own. The Steer gave 43 negations per 1,000 at −20.6 DUFS; random directions of the same size gave 19 and 31 at about the same loudness. The random pushes were as loud without the rise.</p></div>
+      <div class="card"><h3>Early exit</h3>
+        <span class="chain">exit layer=8</span>
+        <p>Write from layer 8 through the final norm and the output layer, the model a Tap reads, run as the writer. Layer 11 is still fluent (−10.6 DUFS); after layer 8 it repeats (“not necessarily necessarily”).</p></div>
+      <div class="card"><h3>A bell-shaped vSparsify</h3>
+        <span class="chain">gate layer=all keep=0.6 wet=0.8 env=bell epeak=0.6 ewidth=0.3 eedge=0.2 wfrom=10</span>
+        <p>Sparsifies the stream most at about two thirds of the depth, from token 10 on. With a vRotate under random control it read −26.5 DUFS, word edit distance 0.83.</p></div>
+    </div>
+  </section>
+
+  <!-- 07 -->
+  <section class="section wrap reveal" id="holes">
+    <span class="num">07</span>
+    <h2>Rabbit holes</h2>
+    <p>Things to try that lead somewhere odd. Most of them end in a strange text and a question about what the model is doing.</p>
+    <div class="cards">
+      <div class="card hole"><h3>More more more</h3>
+        <span class="chain">saturator layer=6 drive=2 mix=1
+delay layer=6 time=4 feedback=0.3 mix=0.5
+eq layer=6 low=1.6 mid=1 high=0.4
+reverb layer=6 decay=0.8 mix=0.5</span>
+        <figure class="clip green" style="margin:0.2rem 0 0.7rem">
+          <a class="shot" href="img/bench-more-more.webp" data-cap="vSquash, vLookback, vBands and vAverage, all at layer 6. The diverged text is “more” for fifty tokens; word edit distance 0.98; −4.1 DUFS. The diverged run chose “ more” at token 1 with p 0.223."><img src="img/c-more-more.webp" width="1080" height="423" loading="lazy" alt="The diverged text panel: the prompt, then 'more more more' repeated over four lines, with 'less' twice."></a>
+        </figure>
+        <p>Four effects on one layer, each mild on its own. Together GPT-2 writes “more more more” for fifty tokens, word edit distance 0.98, −4.1 DUFS. Take one strip out at a time with Leave one out and see which one carries it.</p></div>
+      <div class="card hole"><h3>Negations from a negation notch</h3>
+        <p>vAbliterate at full strength, with a flat kernel and the shipped negation contrast set, <i>raised</i> the rate of negations to 57 per 1,000 (the original 23). That direction is read at the end of sentences such as “The door is not open”, after the “not”: it marks having negated. The decision direction, read before the word, is the one that removes it.</p></div>
+      <div class="card hole"><h3>The ellipsis floor</h3>
+        <p>In the dose sweep above, surprisal under the original model peaks at scale 6 (295.0 perplexity) and then falls to 2.96 at scale 8, below the original text's 5.08. The text by then is ellipses. A low surprisal can mean a text has collapsed.</p></div>
+      <div class="card hole"><h3>Inside the band</h3>
+        <p>A word edit distance of 0.92 sounds like a large change. The control band says another seed moves the words as far (0.848 to 0.958). Here the surprisal under the original model is what sets this Steer apart: 8.1 standard deviations outside the band.</p></div>
+      <div class="card hole"><h3>Self-repair across the heads</h3>
+        <figure class="clip blue" style="margin:0.4rem 0 0.6rem">
+          <a class="shot" href="img/c-repair-grid.webp" data-cap="Sweep, Repair vB: mean-ablating each head. Blocks 0 to 6 read mostly +8 to +13 vB (their effect runs through the later layers); blocks 9 to 11 mostly below 0 (the later layers damp it). Head 0.1 reads +22."><img src="img/c-repair-grid.webp" width="1520" height="755" loading="lazy" alt="The Sweep popup set to Repair vB: a grid of blocks by heads in orange for positive and teal for negative values, the early rows positive and the last rows negative."></a>
+        </figure>
+        <p>Set the Sweep to <b>Repair vB</b>. Mean-ablating a head in blocks 0 to 6 reads mostly +8 to +13 vB; in blocks 9 to 11 mostly below 0. In this grid the early heads' changes run on through the layers after them, and the late heads' changes are damped.</p></div>
+      <div class="card hole"><h3>Negation and the top three neurons</h3>
+        <p>The Neuron finder's top three for “ not, never, no” are all in block 11. Zeroing them left the rate at 27 per 1,000 (the original 23); scaling them by 4 gave 24. The decision direction, spread over the whole stream, halves it or removes it.</p></div>
+      <div class="card hole"><h3>Position shift</h3>
+        <span class="chain">position mode=shift k=600</span>
+        <p>Tell GPT-2 it is 600 tokens further into its text than it is. It collapses into “all and all a all all” (−2.8 DUFS). Scramble and freeze lose word order at about −6.</p></div>
+      <div class="card hole"><h3>The distance an embedding can travel</h3>
+        <span class="chain">embed swap=" archive, museum" mix=0.3</span>
+        <p>Read “archive” with its embedding part of the way to “museum's”. Run it through a Dose sweep on mix: halfway leaves the words as they were (−22 DUFS), all the way changes them (−18).</p></div>
+      <div class="card hole"><h3>Pythia's training as a timeline</h3>
+        <p>Load Pythia 160M or 410M and set a Revision (<code>step1000</code> to <code>step143000</code>). The same chain on earlier checkpoints of the same model asks when in training a component started to matter.</p></div>
+    </div>
+  </section>
+
+  <!-- 08 -->
+  <section class="section wrap reveal" id="tips">
+    <span class="num">08</span>
+    <h2>Tips</h2>
+    <div class="keys">
+      <div><kbd>Space</kbd><span>Runs the pair; while a job runs, stops it.</span></div>
+      <div><kbd>⟳</kbd><span>Lit, it starts a new run whenever the chain, prompt or sampler changes.</span></div>
+      <div><kbd>←</kbd> <kbd>→</kbd><span>Step the playhead; every meter on the desk follows.</span></div>
+      <div><kbd>Delete</kbd><span>Removes the selected strip; <kbd>⌘Z</kbd> or <kbd>Ctrl+Z</kbd> puts it back.</span></div>
+      <div><kbd>⌘⌥B</kbd><span>Folds the browser (<kbd>Ctrl+Alt+B</kbd> elsewhere).</span></div>
+    </div>
+    <ul>
+      <li><b>Hover any knob</b> for its name and range; the info bar at the foot of the window gives its tip, a formula where the change is one, and how to use the control. Double-click a knob to reset it.</li>
+      <li><b>Slow it down</b>: the tempo under Replay sets how fast the texts are written out, for a run and for a replay, so you can follow where they part.</li>
+      <li><b>Pin a run</b> to set later runs against it as well as against the original: the quickest way to hear what one change did.</li>
+      <li><b>Leave one out</b> runs the chain once without each strip and marks each strip with how much the text changes without it.</li>
+      <li><b>Snap</b> (the camera) saves the Bench as a PNG exactly as it is on screen; the Export menu's <b>Figure</b> draws a run as SVG from its data.</li>
+      <li><b>Drag a direction</b> from the browser onto a Steer, Project out or Direction meter strip to set it.</li>
+      <li><b>Your own units</b> go in <code>data/units/</code>; Rescan units loads them, and the desk marks them ◆ as not built in.</li>
+    </ul>
+  </section>
+
+  <!-- 09 -->
+  <section class="section wrap reveal" id="start">
+    <span class="num">09</span>
+    <h2>Getting started</h2>
+    <p>Requirements: macOS on Apple Silicon (MPS) or Linux, Python 3.12, and <a href="https://github.com/astral-sh/uv">uv</a> or pip. A model must be in the Hugging Face cache, or loading it downloads it.</p>
+    <div class="term"><div class="label"><span>Install and run</span><span class="raw">port 8774</span></div><pre><code><span class="in">git clone https://github.com/vector-lab-tools/abliteration-lens</span>
+<span class="in">cd abliteration-lens</span>
+<span class="in">./setup.sh</span>      <span class="c"># a virtual environment in .venv, then requirements.txt</span>
+<span class="in">./launch.sh</span>     <span class="c"># starts the server on http://127.0.0.1:8774/ and opens the page</span>
+<span class="in">.venv/bin/python -m pytest -q</span>   <span class="c"># the tests load GPT-2</span></code></pre></div>
+    <p>The server listens on this machine only, refuses requests with a foreign <code>Host</code> header and refuses writes without its own header. There are no accounts, no telemetry and no remote inference.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Model</th><th>Year</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>GPT-2 small (124M)</td><td>2019</td><td>The default. Much of the published head-level interpretability work uses it.</td></tr>
+          <tr><td>Qwen3 0.6B</td><td>2025</td><td>A recent Llama-style model, in bf16.</td></tr>
+          <tr><td>Pythia 160M, 410M</td><td>2023</td><td>With EleutherAI's training checkpoints, in the Revision box.</td></tr>
+          <tr><td>Llama 3.2 3B (base)</td><td>2024</td><td>Larger; chains run, a full head map is slow.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Any model in the Hugging Face cache, or a folder holding a checkpoint, can be typed into the picker. GPT-2, GPT-NeoX (Pythia) and Llama-style models (Llama, Qwen, Mistral, OLMo-2) are supported, loaded with <code>trust_remote_code=False</code>. Models under a billion parameters load in float32 so that runs regenerate exactly.</p>
+    <p>Settings, Models lists them, marked downloaded or not, and opens a deep dive on each: who made it and when, its licence, its architecture and size, the memory its weights need against what the machine has free, its training data, which strips run on it, and a Load button. The (i) on the Instrument opens the same deep dive on the loaded model. All of it is read from the model's files on the machine.</p>
+  </section>
+
+  <!-- 10 -->
+  <section class="section wrap reveal" id="vau">
+    <span class="num">10</span>
+    <h2>Vector Abliteration Units</h2>
+    <p>Abliteration Lens is the first host of VAU 1, a standard for units that change, or read, what a model does from inside. A unit declares its parameters, the kind of place it acts on (the stream, a component's output, weights, the logits) and what it needs from its host. It never registers a hook itself: it asks the host, and the host attaches it, measures it and takes it off after the run. The host features (wet, envelope, keep size, window, random control) come from the host, so every unit has them without implementing them.</p>
+    <div class="links">
+      <a href="https://vector-lab-tools.github.io/vector-abliteration-units/"><b>VAU site</b><span>The standard, the built-in units, the architecture</span></a>
+      <a href="https://github.com/vector-lab-tools/vector-abliteration-units"><b>VAU on GitHub</b><span>The package <code>vau</code> and its conformance checks</span></a>
+      <a href="https://github.com/vector-lab-tools/abliteration-lens"><b>Abliteration Lens on GitHub</b><span>The host: backend, page and tests</span></a>
+      <a href="https://vector-lab-tools.github.io"><b>Vector Lab</b><span>The other tools and the map</span></a>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="section wrap reveal" id="credits">
+    <span class="num">11</span>
+    <h2>Credits</h2>
+    <div class="credit">
+      <h3>Terence Broad</h3>
+      <p>Terence Broad's ideas strongly influenced this project. It took shape after I heard his Sussex AI seminar, “Expanding the generative space”, at the University of Sussex's Sussex AI research centre on Wednesday 14 October 2026. His network bending, deterministic transformations inserted as layers into a trained generative network and applied while it runs, and the active divergence he and his co-authors survey, are the ideas the desk applies to a language model.</p>
+      <ul class="refs">
+        <li>Broad, T., Berns, S., Colton, S. and Grierson, M. (2021) “Active Divergence with Generative Deep Learning: A Survey and Taxonomy”, <i>Proceedings of the 12th International Conference on Computational Creativity (ICCC 2021)</i>. <a href="https://arxiv.org/abs/2107.05599">arXiv:2107.05599</a>.</li>
+        <li>Broad, T., Leymarie, F. F. and Grierson, M. (2021) “Network Bending: Expressive Manipulation of Deep Generative Models”, <i>EvoMUSART 2021: Artificial Intelligence in Music, Sound, Art and Design</i>. <a href="https://arxiv.org/abs/2005.12420">arXiv:2005.12420</a>.</li>
+      </ul>
+    </div>
+    <h3>Inspirations for the units and strips</h3>
+    <ul>
+      <li><b>ROME</b> (Meng, Bau, Andonian and Belinkov 2022), for Rewrite's rank-one edit to one MLP.</li>
+      <li><b>repeng</b> (Theia Vogel's library for control vectors), for directions by PCA, pairs from a template, and sums of directions.</li>
+      <li><b>Contrastive decoding</b> (Li et al. 2022), for the Contrast strip.</li>
+      <li><b>Arbitrary-Rank Ablation</b> in Heretic (Weidmann 2026), for vMorph's objective; Heretic's kernel for the linear envelope and vAbliterate.</li>
+      <li><b>OBLITERATUS</b>, for mean-referenced erasure (<code>to=mean</code>), the bell weighting, winsorization in the vClamp, the Neuron finder's scoring, and the question the Sweep asks.</li>
+      <li><b>Arditi et al. (2024)</b>, for reading a direction where the model decides; <b>McGrath et al. (2023)</b>, for the Hydra effect that self-repair measures.</li>
+      <li><b>Ableton Live</b>, whose audio devices inspired the effects, and whose layout inspired the Bench. Abliteration Lens is not affiliated with Ableton.</li>
+    </ul>
+    <h3>Parts from the sibling tools</h3>
+    <p>Vectorscope (model loading, contrastive directions, the fake-quantisation kernel for Coarsen), LLMbench (the Grammar Probe patterns, the stance word lists, the six annotation types, the probability scale), Video Kintsugi (the mixing desk, the Text and Code views, the local server's guards), bench-kit (witnesses, numbered lines and descent) and Ablation Bench (a shared direction format and layer numbering).</p>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot">
+      <img src="img/mark.svg" alt="">
+      <div>
+        <p><b>Abliteration Lens</b>, a <a href="https://vector-lab-tools.github.io">Vector Lab</a> tool. David M. Berry, University of Sussex. Free software under the GNU General Public License, version 3 or later (GPL-3.0-or-later).</p>
+        <p><a href="https://github.com/vector-lab-tools/abliteration-lens">Repository</a> · <a href="https://vector-lab-tools.github.io/vector-abliteration-units/">Vector Abliteration Units</a> · <a href="https://vector-lab-tools.github.io">vector-lab-tools.github.io</a></p>
+        <p>This page loads nothing from another site.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot, enlarged" hidden>
+  <button type="button" aria-label="Close">✕</button>
+  <img alt="">
+  <div class="cap"></div>
+</div>
+
+<script src="site.js"></script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>What is abliteration? · Abliteration Lens</title>
+  <meta name="description" content="Abliteration, from removing a refusal direction to bending a language model while it writes, and what that does to text: real runs of GPT-2 small, original beside bent, with the same seed.">
+  <link rel="icon" href="img/mark.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#f3f2ee" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e1015" media="(prefers-color-scheme: dark)">
+  <script>(function(){try{var t=localStorage.getItem('abl-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- Written by hand; the figures' texts are real runs (abliteration-data.js, tools/abliteration_page.py). Copyright (C) 2026 David M. Berry. SPDX-License-Identifier: GPL-3.0-or-later -->
+<a class="skip" href="#main">Skip to the content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Abliteration Lens, home">
+      <img src="img/mark.svg" alt="">
+      <span class="brand-block">
+        <span class="brand-name">Abliteration Lens</span>
+        <span class="brand-tagline">What is abliteration?</span>
+      </span>
+    </a>
+    <div class="head-tools">
+      <nav class="site-nav" aria-label="Pages and sections">
+        <a href="./">Home</a>
+        <a href="#word">The word</a>
+        <a href="#moves">Add, remove, turn</a>
+        <a href="#text">Bending text</a>
+        <a href="strips.html">Strips</a>
+        <a href="./#start">Get started</a>
+        <span class="nav-sep" aria-hidden="true"></span>
+        <a class="ext" href="https://github.com/vector-lab-tools/abliteration-lens">GitHub</a>
+        <a class="ext vau" href="https://vector-lab-tools.github.io/vector-abliteration-units/" title="Vector Abliteration Units: the unit standard whose first host this is">VAU ↗</a>
+      </nav>
+      <button class="theme-toggle" type="button" aria-label="Switch between light and dark" title="Switch between light and dark">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="hero hero-short">
+  <div class="wrap hero-inner">
+    <span class="kicker">Abliteration Lens · abliteration and text</span>
+    <h1><span class="glitch" id="title" data-text="What is abliteration?">What is abliteration?</span></h1>
+    <p class="tagline">Abliteration Lens takes its name from abliteration: removing a direction from a model's internal vectors so that it stops doing something. Here the word covers every edit to those vectors while the model writes, and the model is a language model. This page says what that does to text, with real runs set beside the text the unchanged model writes from the same prompt and seed, and beside the ordinary edit to a text that comes nearest.</p>
+  </div>
+</section>
+
+<main class="content" id="main">
+
+  <div class="wrap toc-strip" aria-label="On this page">
+    <a href="#word">The word</a><a href="#moves">Add, remove, turn</a><a href="#text">Bending text</a><a href="#not">Not</a><a href="#echo">Echo</a><a href="#depth">Depth</a><a href="#movement">Movement</a><a href="#edge">The edge</a><a href="#takes">Takes</a><a href="#limits">Limits</a><a href="#refs">References</a>
+  </div>
+
+  <!-- 01 -->
+  <section class="section wrap reveal" id="word">
+    <span class="num">01</span>
+    <h2>The word</h2>
+    <p class="lede">In the interpretability literature, abliteration means removing a refusal direction from a chat model. Arditi et al. (2024) found that refusal in a range of open chat models runs through a single direction in the residual stream: add it and a model refuses harmless requests, take it out and it stops refusing. Removing that direction from the model's weights, so that it no longer refuses, came to be called abliteration in the open-model community (Labonne 2024).</p>
+    <p>GPT-2 small, the Lens's default model, was never trained to refuse. What it has are directions for features of its writing. The Lens makes them from pairs of texts that differ in one feature: <b>negation</b> from sentences with and without “not”, and in the same way <b>not-x-but-y</b>, the construction “not this but that”. Removing the negation direction from what the model's blocks write is abliteration in the first sense, applied to grammar. Most of the other things the Lens does to the model remove no direction at all: they push the stream along one, turn it, squash it, round it, or feed it the stream from earlier tokens.</p>
+    <p>So Abliteration Lens uses the word in an extended sense, for any change to a generative model's internal vectors made while it runs. Terence Broad and his co-authors call this family active divergence, and its most direct form network bending: transformations inserted into a trained network as it generates (Broad, Leymarie and Grierson 2021; Broad, Berns, Colton and Grierson 2021). Abliteration is one bend among many.</p>
+  </section>
+
+  <!-- 02 -->
+  <section class="section wrap reveal" id="moves">
+    <span class="num">02</span>
+    <h2>Add, remove, turn</h2>
+    <p>Three things a strip can do along one direction of the stream. Steer <b>adds</b> it, vAbliterate <b>removes</b> it, vRotate <b>turns</b> it toward another. Choose one and move the slider: the drawing shows what happens to the stream at one token, and the text under it is the real run at that setting, with the words that differ from the original marked.</p>
+    <div class="viz" id="viz-art" role="group" aria-label="Interactive figure: a vector and the negation direction, with the stream added to, removed from, or turned along it, and the real text at each setting below">
+      <svg viewBox="0 0 960 330" aria-hidden="true"></svg>
+      <div class="bar"><span class="lab">Move</span>
+        <button type="button" data-mode="add" aria-pressed="true">add</button>
+        <button type="button" data-mode="remove" aria-pressed="false">remove</button>
+        <button type="button" data-mode="turn" aria-pressed="false">turn</button>
+        <label>setting <input type="range" min="0" max="1" step="1" value="0"><output>0</output></label></div>
+      <div class="readout" aria-live="polite"></div>
+    </div>
+    <div class="textbox wide" id="art-text"></div>
+    <p>Along this direction the counts go the other way from the names. Over eight seeds the original writes 21.5 negation words per 1,000. Steer at +2 and +4 took that to 0. vAbliterate, which removes the direction, raised it to 37.6 at strength 0.5, 47.8 at 1 and 80.1 at 1.5. vRotate, turning the direction toward not-x-but-y, left it between 19.1 and 24.2, though on seed 42 the text gains a “not” from 45° on. One reading of this: the direction is the difference between the stream at the last word of sentences with “not” and the same sentences without it (“The door is not open”, “The door is open”), so it may mark a negation already made rather than one about to be written. Adding it would then tell the model the “not” is done, and removing it would leave one to write. That is a reading of the numbers; the Lens does not test it.</p>
+    <p class="viz-cap" id="moves-cap"><b>Every text here is a real run</b> of GPT-2 small, made with the Lens's backend and saved with the page; the page cannot run the model. Each starts from the prompt “<span data-abl="provenance.prompt"></span>” with seed <span data-abl="provenance.seed"></span>, temperature 0.8, top-k 40 and top-p 0.95, for 50 tokens. Beside each are the measures the Lens reports: the word edit distance from the original (0 the same, 1 nothing in common), the token where the two texts part, and the loudness of the change in DUFS. The count of negation words (not, no, never, nothing, without, can't, don't and the like) is per 1,000 words over eight seeds, 40 to 47, since one text is too short to count in.</p>
+  </section>
+
+  <!-- 03 -->
+  <section class="section wrap reveal" id="text">
+    <span class="num">03</span>
+    <h2>What it does to text</h2>
+    <p class="lede">Editing usually starts from a text. A writer drafts it, and an editor cuts, moves and replaces its words. Here there is no text until the model writes one, a token at a time, and the controls act on the state the model writes it from. A change there changes what is written: its subject, its register, its grammar and its length, as well as its words.</p>
+    <p>The examples below set the two side by side. In each, the first text is the model unbent; the second is an ordinary edit to that same text; the third is the model bent from inside toward the same end.</p>
+
+    <h3 id="not">Not</h3>
+    <p id="not-p">Deleting the negation words is the nearest ordinary edit to removing negation, and it reverses what the text says: “you can't access the archive” becomes “you can access the archive”. Projecting the negation direction out of the stream at every layer, measured from the stream's average there (<code>to=mean</code>), deletes no word. On the prompt “Memory is not the same as the archive, because”, seed 42, the model parts from the original at its second token and writes “you don't have to load it”, with two negations where the original had one. Over eight seeds the negation words went from 25.4 to 29.7 per 1,000.</p>
+    <div class="trio" id="trio-not"></div>
+
+    <h3 id="echo">Echo</h3>
+    <p id="echo-p">A delay on a text repeats its words: here each four words come again, in brackets, four words later. vLookback adds the stream from four tokens back to the stream at layer 6, with feedback 0.3 and a mix of 0.5, and the model writes from that mixed state. It repeats no words. The text parts from the original at the third token and goes on to “a lot of old junk”, at −14.5 DUFS. At feedback 0.6 and a mix of 0.8 the words begin to come back: “archive” seven times in 41 words, where the original has it once.</p>
+    <div class="trio" id="trio-echo"></div>
+
+    <h3 id="depth">Depth</h3>
+    <p id="depth-p">An edit has one place to go: the text. A strip has thirteen, the residual stream before each of GPT-2 small's twelve blocks and after the last, and the same strip at different depths does different things. vSquash, which soft-clips each coordinate of the stream, at a drive of 2 left the text readable at layers 0 and 1 and from 9 to 12, and broke it into fragments, dashes and repeated words from 2 to 8. Where it broke, the change was mostly louder: −1 to −10.2 DUFS, against −9.2 to −18.8 where it held. Choose a layer.</p>
+    <div class="viz" id="viz-depth" role="group" aria-label="Interactive figure: vSquash at each layer, with its text">
+      <svg viewBox="0 0 960 180" aria-hidden="true"></svg>
+      <div class="bar"><span class="lab">vSquash at layer</span></div>
+    </div>
+    <div class="textbox wide" id="depth-text"></div>
+
+    <h3 id="movement">Movement from inside</h3>
+    <p id="move-p">A strip can be timed. Every VAU unit, and the Lens's stream strips, take a window: the tokens the strip acts on. The same Steer along negation, at layer 6 with a scale of 4, parts from the original at the third token when it acts from the start. With <code>wfrom=15</code> it leaves the first fifteen tokens alone: the text follows the original word for word until the seventeenth token and then goes its own way, at −10.1 DUFS against −8.7. An envelope does the same over the layers instead of the tokens.</p>
+    <div class="trio" id="trio-move"></div>
+
+    <h3 id="edge">The edge as material</h3>
+    <p id="edge-p">Past some setting every strip breaks the text, in ways no edit produces, and some of that is usable. Exit at layer 4 writes from the middle of the model through its final norm and output layer, and sticks on “necessarily”. Pan toward the most recent tokens in every block writes “that that that a a a”. Noise at a sigma of 1 on layer 6 breaks the words themselves. With the position embeddings scrambled the model writes “it not it not not”: 42 negation words in fifty tokens, more than any setting of the negation direction.</p>
+    <div class="trio four" id="trio-edge"></div>
+
+    <h3 id="takes">Takes and recall</h3>
+    <p id="takes-p">A seed is a take. The same seed, prompt, sampler and chain give the same text, token for token: run again for this page, the original came back identical. Every run keeps its recipe, so the Lens can write it again and check that it matches. Changing the seed changes the text as much as a strong strip does: the eight originals below are 0.93 apart in word edit distance on average, where most of the strips on this page measure 0.84 to 1 (the Steer that waits fifteen tokens, 0.47). Edit distance saturates once two texts part, which is why the Lens also reports where they part and the loudness, and why its control band asks whether a change is larger than a change of seed.</p>
+    <ul class="takes" id="takes-list"></ul>
+  </section>
+
+  <!-- 04 -->
+  <section class="section wrap reveal" id="limits">
+    <span class="num">04</span>
+    <h2>Where the comparison with editing fails</h2>
+    <div class="note break"><span class="tag">Breaks</span><p><b>A direction is not a word.</b> Negation is a direction made from pairs of sentences; it moves how often the model writes “not”, and it also moves what the model writes about. Removing it does not delete the word, and adding it does not insert the word.</p></div>
+    <div class="note break"><span class="tag">Breaks</span><p><b>The output feeds the input.</b> The model reads every token it has written. A change at one token carries into the tokens after it, so a strip's effect builds and wanders, and switching it off part way does not return the text to where it was.</p></div>
+    <div class="note break"><span class="tag">Breaks</span><p><b>Time is tokens.</b> A strip's time is counted in tokens, which are pieces of words. vLookback's four positions are four tokens back, and what comes back is a state the model writes from, not a copy of the words.</p></div>
+    <div class="note break"><span class="tag">Breaks</span><p><b>A few numbers do not describe a text.</b> The measures here (edit distance, where the texts part, loudness, a count of negation words) find where a text breaks and how far it moved. Whether the result is worth reading is decided by reading it.</p></div>
+  </section>
+
+  <!-- 05 -->
+  <section class="section wrap reveal" id="refs">
+    <span class="num">05</span>
+    <h2>References</h2>
+    <ul class="refs">
+      <li>Arditi, A., Obeso, O., Syed, A., Paleka, D., Panickssery, N., Gurnee, W. and Nanda, N. (2024) “Refusal in Language Models Is Mediated by a Single Direction”. <a href="https://arxiv.org/abs/2406.11717">arXiv:2406.11717</a>.</li>
+      <li>Broad, T., Berns, S., Colton, S. and Grierson, M. (2021) “Active Divergence with Generative Deep Learning: A Survey and Taxonomy”, <i>Proceedings of the 12th International Conference on Computational Creativity (ICCC 2021)</i>. <a href="https://arxiv.org/abs/2107.05599">arXiv:2107.05599</a>.</li>
+      <li>Broad, T., Leymarie, F. F. and Grierson, M. (2021) “Network Bending: Expressive Manipulation of Deep Generative Models”, <i>EvoMUSART 2021: Artificial Intelligence in Music, Sound, Art and Design</i>. <a href="https://arxiv.org/abs/2005.12420">arXiv:2005.12420</a>.</li>
+      <li>Labonne, M. (2024) “Uncensor any LLM with abliteration”, Hugging Face blog. <a href="https://huggingface.co/blog/mlabonne/abliteration">huggingface.co/blog/mlabonne/abliteration</a>.</li>
+    </ul>
+  </section>
+
+  <section class="section wrap reveal">
+    <div class="links">
+      <a href="./"><b>Abliteration Lens</b><span>The instrument and how it works</span></a>
+      <a href="strips.html"><b>Strips</b><span>Every built-in strip, with a figure of what its code computes</span></a>
+      <a href="https://vector-lab-tools.github.io/vector-abliteration-units/"><b>VAU site</b><span>The units: the standard and the Core Collection</span></a>
+      <a href="https://github.com/vector-lab-tools/abliteration-lens"><b>GitHub</b><span>The code, and the tool that made these texts</span></a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot">
+      <img src="img/mark.svg" alt="">
+      <div>
+        <p><b>Abliteration Lens</b>, a <a href="https://vector-lab-tools.github.io">Vector Lab</a> tool. David M. Berry, University of Sussex. Free software under the GNU General Public License, version 3 or later (GPL-3.0-or-later).</p>
+        <p><a href="./">Home</a> · <a href="strips.html">Strips</a> · <a href="https://github.com/vector-lab-tools/abliteration-lens">Repository</a> · <a href="https://vector-lab-tools.github.io/vector-abliteration-units/">Vector Abliteration Units</a></p>
+        <p>This page loads nothing from another site.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="abliteration-data.js"></script>
+<script src="abliteration.js"></script>
+<script src="site.js"></script>
+</body>
+</html>

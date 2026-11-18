@@ -1,0 +1,38 @@
+{
+  "steer": {
+    "layer": "The residual stream it adds to: 0 is the embeddings, l the output of block l − 1; all, a range (3-7) or a list (1,4) work too.",
+    "dir": "The direction added, by name, used as stored, so its length counts.",
+    "scale": "How many times the direction is added at every position; 0 changes nothing, below 0 pushes the other way."
+  },
+  "project": {
+    "layer": "The residual stream it acts on: 0 is the embeddings, l the output of block l − 1; all, a range (3-7) or a list (1,4) work too.",
+    "dir": "The direction whose part of the stream is taken away or turned round, by name; only its direction counts, not its length.",
+    "mode": "remove takes the part along the direction away; reflect turns it round, so it points the other way.",
+    "to": "zero measures the part from nothing; mean measures it from the stream's corpus mean, so remove sets it to the ordinary amount.",
+    "k": "How many directions go at once: 1 is the direction alone, more adds the next principal directions of what it was made from."
+  },
+  "noise": {
+    "layer": "The residual stream it adds noise to: 0 is the embeddings, l the output of block l − 1; all, a range (3-7) or a list (1,4) work too.",
+    "sigma": "How much noise: a share of each position's own size (its root mean square), so 1 adds about as much as the stream holds; 0 changes nothing.",
+    "abs": "On, sigma is an absolute amount, the same at every position, rather than a share of the stream's size.",
+    "seed": "The noise's own seed (the run's if left out): the same seed gives the same noise every pass."
+  },
+  "transplant": {
+    "layer": "The residual stream that is replaced: 0 is the embeddings, l the output of block l − 1.",
+    "prompt": "The other prompt, run on the unchanged model, whose stream is taken.",
+    "at": "Which token of this prompt receives it: −1 is the last, −2 the one before; 0 and up count from the start.",
+    "from": "Which token of the other prompt it is taken from: −1 is the last, −2 the one before; 0 and up count from the start."
+  },
+  "embed": {
+    "swap": "Two single tokens, a,b: the model reads each with the other's input embedding (GPT-2 tokens usually start with a space).",
+    "mix": "With a swap, how far the first word's embedding moves toward the second's instead: 0 its own, 1 the second's; the second word is left as it is.",
+    "token": "One single token that gets a fixed noise vector added to its input embedding, wherever it occurs.",
+    "sigma": "With token=, the noise's size as a share of the token's embedding: 1 adds about as much as the embedding holds."
+  },
+  "vocoder": {
+    "layer": "The one layer of the residual stream where the modulator's band levels are imposed: 0 is the embeddings, l the output of block l − 1.",
+    "prompt": "The modulator: the text whose band levels, measured on the unchanged model, are imposed on the text being written.",
+    "bands": "How many bands of principal directions, spaced logarithmically; rounding merges some of the narrowest, so 16 gives 15.",
+    "mix": "How far each band moves to the modulator's level: 0 changes nothing, 1 imposes it fully."
+  }
+}

@@ -1,0 +1,146 @@
+{
+ "about": "The built-in strips' parameter notes, and the strips with a figure (web/explain/<kind>.explain.js). Made by tools/strip_examples.py.",
+ "tips": {
+  "ablate": {
+   "mode": "zero removes the component's output; mean puts its average over the reference corpus in its place.",
+   "head": "One head as block.head (5.1), every head of a block (5.*), or several (5.1,5.3).",
+   "attn": "The attention layer of a block, or several (3-7, 1,4, all).",
+   "mlp": "The MLP of a block, or several (3-7, 1,4, all).",
+   "block": "A whole block's contribution, its output minus its input, or several blocks."
+  },
+  "scale": {
+   "k": "Multiplies what the component adds (or, on a layer, the whole stream): 1 changes nothing, 0 removes it, below 0 reverses it.",
+   "head": "One head as block.head (5.1), every head of a block (5.*), or several (5.1,5.3).",
+   "attn": "The attention layer of a block, or several (3-7, 1,4, all).",
+   "mlp": "The MLP of a block, or several (3-7, 1,4, all).",
+   "block": "A whole block's contribution, its output minus its input, or several blocks.",
+   "layer": "The residual stream itself: 0 is the embeddings, l the stream after block l − 1; all for every layer."
+  },
+  "coarsen": {
+   "bits": "How finely the block's weight matrices are rounded: 8 is 127 levels a side, 4 is 7, 3 is 3, 2 is only −max, 0 and +max.",
+   "block": "The block whose weight matrices are rounded (or several); the rest of the model keeps full precision."
+  },
+  "reorder": {
+   "skip": "Blocks left out of the run (6, or 3-5).",
+   "repeat": "Blocks run twice in a row (5).",
+   "swap": "Two blocks that change places (3,8)."
+  },
+  "exit": {
+   "layer": "The layer the stream leaves at for the final norm and output layer: blocks from this one on are not run; the last layer changes nothing."
+  },
+  "position": {
+   "mode": "shift reads position p + k, scramble a fixed random position for each, freeze position k for every token.",
+   "k": "How many positions shift moves each token on (0 changes nothing), or the one position freeze reads; scramble ignores it.",
+   "seed": "The seed of scramble's random positions (the run's seed if not given); shift and freeze ignore it."
+  },
+  "steer": {
+   "layer": "The residual stream it adds to: 0 is the embeddings, l the output of block l − 1; all, a range (3-7) or a list (1,4) work too.",
+   "dir": "The direction added, by name, used as stored, so its length counts.",
+   "scale": "How many times the direction is added at every position; 0 changes nothing, below 0 pushes the other way."
+  },
+  "project": {
+   "layer": "The residual stream it acts on: 0 is the embeddings, l the output of block l − 1; all, a range (3-7) or a list (1,4) work too.",
+   "dir": "The direction whose part of the stream is taken away or turned round, by name; only its direction counts, not its length.",
+   "mode": "remove takes the part along the direction away; reflect turns it round, so it points the other way.",
+   "to": "zero measures the part from nothing; mean measures it from the stream's corpus mean, so remove sets it to the ordinary amount.",
+   "k": "How many directions go at once: 1 is the direction alone, more adds the next principal directions of what it was made from."
+  },
+  "noise": {
+   "layer": "The residual stream it adds noise to: 0 is the embeddings, l the output of block l − 1; all, a range (3-7) or a list (1,4) work too.",
+   "sigma": "How much noise: a share of each position's own size (its root mean square), so 1 adds about as much as the stream holds; 0 changes nothing.",
+   "abs": "On, sigma is an absolute amount, the same at every position, rather than a share of the stream's size.",
+   "seed": "The noise's own seed (the run's if left out): the same seed gives the same noise every pass."
+  },
+  "transplant": {
+   "layer": "The residual stream that is replaced: 0 is the embeddings, l the output of block l − 1.",
+   "prompt": "The other prompt, run on the unchanged model, whose stream is taken.",
+   "at": "Which token of this prompt receives it: −1 is the last, −2 the one before; 0 and up count from the start.",
+   "from": "Which token of the other prompt it is taken from: −1 is the last, −2 the one before; 0 and up count from the start."
+  },
+  "embed": {
+   "swap": "Two single tokens, a,b: the model reads each with the other's input embedding (GPT-2 tokens usually start with a space).",
+   "mix": "With a swap, how far the first word's embedding moves toward the second's instead: 0 its own, 1 the second's; the second word is left as it is.",
+   "token": "One single token that gets a fixed noise vector added to its input embedding, wherever it occurs.",
+   "sigma": "With token=, the noise's size as a share of the token's embedding: 1 adds about as much as the embedding holds."
+  },
+  "vocoder": {
+   "layer": "The one layer of the residual stream where the modulator's band levels are imposed: 0 is the embeddings, l the output of block l − 1.",
+   "prompt": "The modulator: the text whose band levels, measured on the unchanged model, are imposed on the text being written.",
+   "bands": "How many bands of principal directions, spaced logarithmically; rounding merges some of the narrowest, so 16 gives 15.",
+   "mix": "How far each band moves to the modulator's level: 0 changes nothing, 1 imposes it fully."
+  },
+  "pan": {
+   "block": "Which blocks' attention is biased: one block, a range such as 3-7, or all.",
+   "depth": "How far the farthest key is pushed, in units of attention score: the bias reaches pan × depth at the start.",
+   "pan": "Which way attention moves: above 0 toward the most recent tokens, below 0 toward the start; 0 changes nothing."
+  },
+  "rewrite": {
+   "block": "The block whose MLP is edited (GPT-2 small has blocks 0 to 11).",
+   "prompt": "A sentence that leads up to the fact, ending where the target should follow.",
+   "subject": "The words in the prompt the fact is about; the edit is keyed to their last token.",
+   "target": "What the model should write after the prompt, usually with a leading space.",
+   "save": "A name to also save the edit under in data/patches, for the Patch strip to load.",
+   "amount": "How much of the edit is added: 0 changes nothing, 1 is the fitted edit, 2 doubles it."
+  },
+  "patch": {
+   "file": "The patch's name in data/patches, without .safetensors.",
+   "scale": "How much of the saved change is added for the run: 0 changes nothing, 1 adds it as saved."
+  },
+  "token": {
+   "word": "The word or words, between commas and with their leading spaces: \" not, never\".",
+   "mode": "zero gives the word a zero input embedding wherever it occurs; ban stops the model writing it."
+  },
+  "contrast": {
+   "keep": "Only tokens with at least this share of the diverged model's top chance can be chosen.",
+   "alpha": "How strongly the original model's chances are divided out; 0 changes nothing."
+  },
+  "sample": {
+   "mode": "ban-top forbids the likeliest tokens, ceiling forbids any above a chance, invert favours the least likely.",
+   "k": "For ban-top, how many of the most probable next tokens are forbidden.",
+   "p": "For ceiling, the highest chance a token may have and still be chosen."
+  },
+  "chorus": {
+   "voices": "How many detuned copies run beside the dry chain; 0 is neutral, and each voice is one more pass at every step.",
+   "sigma": "The detune: each voice's noise at the layer, as a share of the stream's size there (its root mean square).",
+   "layer": "The one layer whose stream the voices add their noise to, 0 (the embedding) to 12."
+  },
+  "tap": {
+   "layer": "The layer whose stream is read through the final norm and the output layer: 12 is the model's own output, 0 the embedding."
+  },
+  "meter": {
+   "layer": "The layer whose stream's size (its L2 norm) is shown at each token: 0 is the embedding, 12 the last block's output."
+  },
+  "gauge": {
+   "dir": "The direction to measure along, made unit length at the layer read; negation ships with the Lens.",
+   "layer": "The layer whose stream is measured against the direction."
+  },
+  "scope": {
+   "head": "The head to watch, as block.head counted from 0: 4.11 is block 4's last head."
+  }
+ },
+ "explain": [
+  "ablate",
+  "chorus",
+  "coarsen",
+  "contrast",
+  "embed",
+  "exit",
+  "gauge",
+  "meter",
+  "noise",
+  "pan",
+  "patch",
+  "position",
+  "project",
+  "reorder",
+  "rewrite",
+  "sample",
+  "scale",
+  "scope",
+  "steer",
+  "tap",
+  "token",
+  "transplant",
+  "vocoder"
+ ]
+}

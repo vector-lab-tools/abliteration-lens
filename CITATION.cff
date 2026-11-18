@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use Abliteration Lens in your work, please cite it as below."
+title: "Abliteration Lens: a mixing desk for a language model's forward pass"
+abstract: >-
+  A local instrument that changes how an open-weight language model's
+  forward pass runs while it writes, as a chain of strips on a desk, and sets the diverged text
+  beside the text the unchanged model writes from the same prompt and seed. The first host of
+  Vector Abliteration Units (VAU). Part of the Vector Lab family of research instruments.
+type: software
+authors:
+  - family-names: Berry
+    given-names: David M.
+    affiliation: University of Sussex
+    orcid: "https://orcid.org/0000-0002-7737-5586"
+repository-code: "https://github.com/vector-lab-tools/abliteration-lens"
+url: "https://vector-lab-tools.github.io/abliteration-lens/"
+license: GPL-3.0-or-later
+version: 0.1.16
+date-released: 2026-11-18
+keywords:
+  - language models
+  - interpretability
+  - steering
+  - abliteration
+  - Vector Abliteration Units

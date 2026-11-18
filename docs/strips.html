@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Strips · Abliteration Lens</title>
+  <meta name="description" content="Abliteration Lens: a local mixing desk for a language model's forward pass. Strips bend the model while it writes; the diverged text sits beside the original. A Vector Lab tool.">
+  <link rel="icon" href="img/mark.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#f3f2ee" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e1015" media="(prefers-color-scheme: dark)">
+  <meta property="og:title" content="Abliteration Lens">
+  <meta property="og:description" content="A mixing desk for a language model's forward pass. Runs on your own machine.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://vector-lab-tools.github.io/abliteration-lens/">
+  <meta property="og:image" content="https://vector-lab-tools.github.io/abliteration-lens/img/hero.webp">
+  <script>(function(){try{var t=localStorage.getItem('abl-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="explain/explain.css">
+</head>
+<body>
+<!-- Written by hand. Copyright (C) 2026 David M. Berry. SPDX-License-Identifier: GPL-3.0-or-later -->
+<a class="skip" href="#main">Skip to the content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Abliteration Lens, home">
+      <img src="img/mark.svg" alt="">
+      <span class="brand-block">
+        <span class="brand-name">Abliteration Lens</span>
+        <span class="brand-tagline">A Vector Lab instrument</span>
+      </span>
+    </a>
+    <div class="head-tools">
+      <nav class="site-nav" aria-label="Sections">
+        <a href="./#desk">Desk</a>
+        <a href="./#how">How it works</a>
+        <a href="strips.html">Strips</a>
+        <a href="abliteration.html">Abliteration</a>
+        <a href="./#views">Views</a>
+        <a href="./#recipes">Recipes</a>
+        <a href="./#holes">Rabbit holes</a>
+        <a href="./#start">Get started</a>
+        <span class="nav-sep" aria-hidden="true"></span>
+        <a class="ext" href="https://github.com/vector-lab-tools/abliteration-lens">GitHub</a>
+        <a class="ext vau" href="https://vector-lab-tools.github.io/vector-abliteration-units/" title="Vector Abliteration Units: the unit standard whose first host this is">VAU ↗</a>
+      </nav>
+      <button class="theme-toggle" type="button" aria-label="Switch between light and dark" title="Switch between light and dark">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="wrap strips-page">
+  <section>
+    <span class="kicker">Abliteration Lens · the built-in strips</span>
+    <h1>Strips</h1>
+    <p>The 23 strips built into Abliteration Lens, each with the help page it opens on the desk: what it does, an animated figure of what its code computes, GPT-2 small's text at the settings the figure walks through (prompt “What matters about the archive is”, seed 42), and its parameters.</p>
+    <p>These strips are the Lens's own code, so only the Lens runs them. The VAUs, such as vShrink and vSparsify from VAU's Core Collection, are <a href="https://vector-lab-tools.github.io/vector-abliteration-units/units.html">Vector Abliteration Units</a>: plug-ins that follow a standard any host can implement, documented on the VAU site.</p>
+    <nav class="st-toc" aria-label="Strips"><div class="st-g"><b>Strips on the model</b><a href="#ablate">Ablate</a><a href="#scale">Scale</a><a href="#steer">Steer</a><a href="#project">Project out</a><a href="#noise">Noise</a><a href="#coarsen">Coarsen</a><a href="#reorder">Reorder</a><a href="#transplant">Transplant</a><a href="#embed">Embedding bend</a><a href="#vocoder">Vocoder</a><a href="#pan">Pan</a><a href="#rewrite">Rewrite</a><a href="#patch">Patch</a><a href="#position">Position bend</a><a href="#exit">Exit</a><a href="#token">Token</a></div><div class="st-g"><b>Sampler strips</b><a href="#contrast">Contrast</a><a href="#chorus">Chorus</a><a href="#sample">Sampler bend</a></div><div class="st-g"><b>Meters</b><a href="#tap">Tap</a><a href="#meter">Level meter</a><a href="#gauge">Direction meter</a><a href="#scope">Attention scope</a></div></nav>
+  </section>
+  <h2 class="st-group" id="g-model">Strips on the model</h2><p class="st-intro">They change the forward pass: a component's output, the stream, the weights, the order of the blocks, the input.</p><article class="strip-card" id="ablate">
+      <div class="unit-head"><h3>Ablate</h3><span class="id">ablate</span></div>
+      <div class="uh">
+        <p class="uh-what">Removes a component's output, or replaces it with its average.</p>
+        <div class="uh-fig" data-vau-explain="ablate" data-title="Ablate"></div>
+        <p class="uh-ex">Example line: <code>ablate head=5.1 mode=zero</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Head</b> <code>head</code></td><td>block.head: 5.1, 5.*, or 5.1,7.3</td><td><code class="uh-tip">One head as block.head (5.1), every head of a block (5.*), or several (5.1,5.3).</code></td></tr><tr><td><b>Attention</b> <code>attn</code></td><td>a block: 5, 3-7, or all</td><td><code class="uh-tip">The attention layer of a block, or several (3-7, 1,4, all).</code></td></tr><tr><td><b>MLP</b> <code>mlp</code></td><td>a block: 5, 3-7, or all</td><td><code class="uh-tip">The MLP of a block, or several (3-7, 1,4, all).</code></td></tr><tr><td><b>Block</b> <code>block</code></td><td>a block: 5, 3-7, or all</td><td><code class="uh-tip">A whole block's contribution, its output minus its input, or several blocks.</code></td></tr><tr><td><b>Mode</b> <code>mode</code></td><td>zero, mean<br><span class="uh-dim">default zero</span></td><td><code class="uh-tip">zero removes the component's output; mean puts its average over the reference corpus in its place.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p><code>ablate head=5.1 mode=zero</code> removes a component's output: whatever that head, attention layer, MLP or block would have added is not added.</p>
+      <dl class="hd"><dt><code>mode=zero</code></dt><dd>the harsher test: the model has never seen that component silent.</dd><dt><code>mode=mean</code></dt><dd>replaces the output with its average over the reference corpus (<code>backend/config/reference-corpus.md</code>), which keeps the stream at a typical size and removes only what the component does for this text.</dd></dl></div></details>
+    </article><article class="strip-card" id="scale">
+      <div class="unit-head"><h3>Scale</h3><span class="id">scale</span></div>
+      <div class="uh">
+        <p class="uh-what">Multiplies a component's output, or the residual stream.</p>
+        <div class="uh-fig" data-vau-explain="scale" data-title="Scale"></div>
+        <p class="uh-ex">Example line: <code>scale mlp=6 k=0.5</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Head</b> <code>head</code></td><td>block.head: 5.1, 5.*, or 5.1,7.3</td><td><code class="uh-tip">One head as block.head (5.1), every head of a block (5.*), or several (5.1,5.3).</code></td></tr><tr><td><b>Attention</b> <code>attn</code></td><td>a block: 5, 3-7, or all</td><td><code class="uh-tip">The attention layer of a block, or several (3-7, 1,4, all).</code></td></tr><tr><td><b>MLP</b> <code>mlp</code></td><td>a block: 5, 3-7, or all</td><td><code class="uh-tip">The MLP of a block, or several (3-7, 1,4, all).</code></td></tr><tr><td><b>Block</b> <code>block</code></td><td>a block: 5, 3-7, or all</td><td><code class="uh-tip">A whole block's contribution, its output minus its input, or several blocks.</code></td></tr><tr><td><b>Layer</b> <code>layer</code></td><td>a layer: 6, 3-7, or all</td><td><code class="uh-tip">The residual stream itself: 0 is the embeddings, l the stream after block l − 1; all for every layer.</code></td></tr><tr><td><b>k</b> <code>k</code></td><td>−4 to 4<br><span class="uh-dim">default 1</span></td><td><code class="uh-tip">Multiplies what the component adds (or, on a layer, the whole stream): 1 changes nothing, 0 removes it, below 0 reverses it.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p><code>scale mlp=7 k=2</code> multiplies a component's output by k. <code>scale layer=6 k=1.5</code> multiplies the whole residual stream at that layer.</p>
+      <dl class="hd"><dt>k = 1</dt><dd>changes nothing.</dd><dt>k = 0</dt><dd>is zero ablation.</dd><dt>k below 0</dt><dd>reverses what the component adds.</dd></dl></div></details>
+    </article><article class="strip-card" id="steer">
+      <div class="unit-head"><h3>Steer</h3><span class="id">steer</span></div>
+      <div class="uh">
+        <p class="uh-what">Adds scale × a direction to the residual stream.</p>
+        <div class="uh-fig" data-vau-explain="steer" data-title="Steer"></div>
+        <p class="uh-ex">Example line: <code>steer layer=6 dir=negation scale=4</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Layer</b> <code>layer</code></td><td>a layer: 6, 3-7, or all</td><td><code class="uh-tip">The residual stream it adds to: 0 is the embeddings, l the output of block l − 1; all, a range (3-7) or a list (1,4) work too.</code></td></tr><tr><td><b>Direction</b> <code>dir</code></td><td>a direction</td><td><code class="uh-tip">The direction added, by name, used as stored, so its length counts.</code></td></tr><tr><td><b>Scale</b> <code>scale</code></td><td>−20 to 20<br><span class="uh-dim">default 0</span></td><td><code class="uh-tip">How many times the direction is added at every position; 0 changes nothing, below 0 pushes the other way.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p><code>steer layer=6 dir=negation scale=4</code> adds scale × a direction to the residual stream at every token (contrastive activation addition, as in Vectorscope's Grammar Steering). A negative scale pushes the other way.</p>
+      <p>The direction is used as stored, so its size matters: a direction with a large norm moves the stream further at the same scale.</p></div></details>
+    </article><article class="strip-card" id="project">
+      <div class="unit-head"><h3>Project out</h3><span class="id">project</span></div>
+      <div class="uh">
+        <p class="uh-what">Removes or reflects the stream's component along a direction.</p>
+        <div class="uh-fig" data-vau-explain="project" data-title="Project out"></div>
+        <p class="uh-ex">Example line: <code>project layer=all dir=negation mode=remove</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Layer</b> <code>layer</code></td><td>a layer: 6, 3-7, or all</td><td><code class="uh-tip">The residual stream it acts on: 0 is the embeddings, l the output of block l − 1; all, a range (3-7) or a list (1,4) work too.</code></td></tr><tr><td><b>Direction</b> <code>dir</code></td><td>a direction</td><td><code class="uh-tip">The direction whose part of the stream is taken away or turned round, by name; only its direction counts, not its length.</code></td></tr><tr><td><b>Mode</b> <code>mode</code></td><td>remove, reflect<br><span class="uh-dim">default remove</span></td><td><code class="uh-tip">remove takes the part along the direction away; reflect turns it round, so it points the other way.</code></td></tr><tr><td><b>To</b> <code>to</code></td><td>zero, mean<br><span class="uh-dim">default zero</span></td><td><code class="uh-tip">zero measures the part from nothing; mean measures it from the stream's corpus mean, so remove sets it to the ordinary amount.</code></td></tr><tr><td><b>Directions</b> <code>k</code></td><td>1 to 16<br><span class="uh-dim">default 1</span></td><td><code class="uh-tip">How many directions go at once: 1 is the direction alone, more adds the next principal directions of what it was made from.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p><code>project layer=all dir=negation mode=remove</code> removes the part of the residual stream that points along a direction, leaving the rest: the model then cannot carry that direction at those layers (directional ablation). This is the probe for the negation deficit: can a direction be taken away or turned round, and what happens to "not" when it is?</p>
+      <dl class="hd"><dt><code>mode=remove</code></dt><dd>takes the part away.</dd><dt><code>mode=reflect</code></dt><dd>reverses it, so what pointed one way along the direction now points the other way.</dd><dt><code>to=mean</code></dt><dd>measures the part from the stream's mean at that layer over the reference corpus, so removing it sets it to the ordinary amount rather than to none (mean-referenced, or affine, erasure, as OBLITERATUS offers it): a gentler cut.</dd><dt><code>k=4</code></dt><dd>removes four directions at once, a subspace: the direction itself, then the next principal directions of the differences it was made from (its texts' last-token streams for a contrast, its tokens against the corpus for a passage, its high positions against its low for a decision direction). A direction from one word has only itself.</dd></dl>
+      <div class="hb-finding"><b>A finding from the build.</b> With the decision direction for negation on GPT-2 (four prompts, four seeds; negation words per 1,000, the original 23): removed on every layer, 0, with the texts collapsing; <code>to=mean</code> on every layer, 26, with the texts intact (−11.3 DUFS); at layer 10, to zero 0 (−12.9 DUFS), to the mean 8 (−22), <code>k=4</code> 8 with shorter texts (−12.1).</div></div></details>
+    </article><article class="strip-card" id="noise">
+      <div class="unit-head"><h3>Noise</h3><span class="id">noise</span></div>
+      <div class="uh">
+        <p class="uh-what">Gaussian noise, scaled to the stream's size.</p>
+        <div class="uh-fig" data-vau-explain="noise" data-title="Noise"></div>
+        <p class="uh-ex">Example line: <code>noise layer=4 sigma=0.3</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Layer</b> <code>layer</code></td><td>a layer: 6, 3-7, or all</td><td><code class="uh-tip">The residual stream it adds noise to: 0 is the embeddings, l the output of block l − 1; all, a range (3-7) or a list (1,4) work too.</code></td></tr><tr><td><b>Absolute</b> <code>abs</code></td><td>on or off<br><span class="uh-dim">default off</span></td><td><code class="uh-tip">On, sigma is an absolute amount, the same at every position, rather than a share of the stream's size.</code></td></tr><tr><td><b>Sigma</b> <code>sigma</code></td><td>0 to 2<br><span class="uh-dim">default 0</span></td><td><code class="uh-tip">How much noise: a share of each position's own size (its root mean square), so 1 adds about as much as the stream holds; 0 changes nothing.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p><code>noise layer=4 sigma=0.3</code> adds random Gaussian noise to the residual stream.</p>
+      <dl class="hd"><dt><code>sigma</code></dt><dd>a share of the stream's size at each token (its root mean square), because the stream grows many times larger from the first layer to the last.</dd><dt><code>abs=1</code></dt><dd>makes sigma an absolute amount.</dd><dt><code>seed=</code></dt><dd>the noise's own seed (or the run's), so it is part of the recipe and repeats exactly.</dd></dl></div></details>
+    </article><article class="strip-card" id="coarsen">
+      <div class="unit-head"><h3>Coarsen</h3><span class="id">coarsen</span></div>
+      <div class="uh">
+        <p class="uh-what">Rounds one block's weights to fewer bits.</p>
+        <div class="uh-fig" data-vau-explain="coarsen" data-title="Coarsen"></div>
+        <p class="uh-ex">Example line: <code>coarsen block=5 bits=4</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Block</b> <code>block</code></td><td>a block: 5, 3-7, or all</td><td><code class="uh-tip">The block whose weight matrices are rounded (or several); the rest of the model keeps full precision.</code></td></tr><tr><td><b>Bits</b> <code>bits</code></td><td>8, 4, 3, 2<br><span class="uh-dim">default 8</span></td><td><code class="uh-tip">How finely the block's weight matrices are rounded: 8 is 127 levels a side, 4 is 7, 3 is 3, 2 is only −max, 0 and +max.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p><code>coarsen block=5 bits=4</code> rounds the weight matrices of one block to 4-bit levels (or 8, 3, 2) and leaves the rest of the model at full precision: material grain as a local change.</p>
+      <p>The rounding is Vectorscope's Precision Degradation method (per-tensor symmetric levels). The weights are put back after the run.</p></div></details>
+    </article><article class="strip-card" id="reorder">
+      <div class="unit-head"><h3>Reorder</h3><span class="id">reorder</span></div>
+      <div class="uh">
+        <p class="uh-what">Skips, repeats or swaps blocks.</p>
+        <div class="uh-fig" data-vau-explain="reorder" data-title="Reorder"></div>
+        <p class="uh-ex">Example line: <code>reorder skip=6</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Skip</b> <code>skip</code></td><td>6 or 3-5</td><td><code class="uh-tip">Blocks left out of the run (6, or 3-5).</code></td></tr><tr><td><b>Repeat</b> <code>repeat</code></td><td>5</td><td><code class="uh-tip">Blocks run twice in a row (5).</code></td></tr><tr><td><b>Swap</b> <code>swap</code></td><td>3,8</td><td><code class="uh-tip">Two blocks that change places (3,8).</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><dl class="hd"><dt><code>reorder skip=6</code></dt><dd>runs the model without block 6.</dd><dt><code>repeat=5</code></dt><dd>runs block 5 twice.</dd><dt><code>swap=3,8</code></dt><dd>exchanges blocks 3 and 8.</dd></dl>
+      <p>The model was never trained with its blocks in another order. While a reorder is on, the tool recomputes the whole text at every step instead of using its cache, so the run is slower.</p></div></details>
+    </article><article class="strip-card" id="transplant">
+      <div class="unit-head"><h3>Transplant</h3><span class="id">transplant</span></div>
+      <div class="uh">
+        <p class="uh-what">The stream from a run on another prompt, put into this one.</p>
+        <div class="uh-fig" data-vau-explain="transplant" data-title="Transplant"></div>
+        <p class="uh-ex">Example line: <code>transplant layer=6 prompt=&quot;The worst thing about the city is&quot; at=-1 from=-1</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Layer</b> <code>layer</code></td><td>a layer: 6, 3-7, or all</td><td><code class="uh-tip">The residual stream that is replaced: 0 is the embeddings, l the output of block l − 1.</code></td></tr><tr><td><b>From prompt</b> <code>prompt</code></td><td>text</td><td><code class="uh-tip">The other prompt, run on the unchanged model, whose stream is taken.</code></td></tr><tr><td><b>At</b> <code>at</code></td><td>−64 to 64<br><span class="uh-dim">default −1</span></td><td><code class="uh-tip">Which token of this prompt receives it: −1 is the last, −2 the one before; 0 and up count from the start.</code></td></tr><tr><td><b>From</b> <code>from</code></td><td>−64 to 64<br><span class="uh-dim">default −1</span></td><td><code class="uh-tip">Which token of the other prompt it is taken from: −1 is the last, −2 the one before; 0 and up count from the start.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p><code>transplant layer=6 prompt="The worst thing about the city is" at=-1 from=-1</code> runs the model on the other prompt, takes the residual stream at layer 6 at its token <code>from</code> (−1 is the last), and puts it into this run at token <code>at</code> of the prompt (activation patching).</p>
+      <p>A small change of wording at one point can leave the sampled text untouched; the control band tells you whether a change is larger than a change of seed.</p></div></details>
+    </article><article class="strip-card" id="embed">
+      <div class="unit-head"><h3>Embedding bend</h3><span class="id">embed</span></div>
+      <div class="uh">
+        <p class="uh-what">Swaps two tokens' embeddings, moves one toward the other, or adds noise to one.</p>
+        <div class="uh-fig" data-vau-explain="embed" data-title="Embedding bend"></div>
+        <p class="uh-ex">Example line: <code>embed swap=&quot; not, also&quot;</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Swap</b> <code>swap</code></td><td>&quot; not, also&quot;</td><td><code class="uh-tip">Two single tokens, a,b: the model reads each with the other's input embedding (GPT-2 tokens usually start with a space).</code></td></tr><tr><td><b>Mix</b> <code>mix</code></td><td>0 to 1<br><span class="uh-dim">default 1</span></td><td><code class="uh-tip">With a swap, how far the first word's embedding moves toward the second's instead: 0 its own, 1 the second's; the second word is left as it is.</code></td></tr><tr><td><b>Token</b> <code>token</code></td><td>text</td><td><code class="uh-tip">One single token that gets a fixed noise vector added to its input embedding, wherever it occurs.</code></td></tr><tr><td><b>Sigma</b> <code>sigma</code></td><td>0 to 2<br><span class="uh-dim">default 0</span></td><td><code class="uh-tip">With token=, the noise's size as a share of the token's embedding: 1 adds about as much as the embedding holds.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><dl class="hd"><dt><code>embed swap=" not, also"</code></dt><dd>the model reads "not" with the embedding of "also" and the reverse, wherever they occur in the input, prompt and generated text alike. GPT-2 tokens usually begin with a space.</dd><dt><code>mix=0.3</code></dt><dd>with a swap, the first word moves toward the second instead of trading places with it: <code>embed swap=" archive, museum" mix=0.3</code> reads "archive" with its embedding 30% of the way to "museum"'s, and leaves "museum" as it is. Mix 0 is neutral.</dd><dt><code>embed token=" not" sigma=0.5</code></dt><dd>adds a fixed noise vector to one token's embedding.</dd></dl>
+      <p>Only the input side changes: the model still writes "not" from its own output layer. Run through a Dose sweep, a mix shows how far a word's embedding can move before the text changes: on the archive prompt, halfway leaves the words as they were (−22 DUFS), all the way changes them (−18).</p></div></details>
+    </article><article class="strip-card" id="vocoder">
+      <div class="unit-head"><h3>Vocoder</h3><span class="id">vocoder</span></div>
+      <div class="uh">
+        <p class="uh-what">Imposes another prompt's band levels on the stream being written.</p>
+        <div class="uh-fig" data-vau-explain="vocoder" data-title="Vocoder"></div>
+        <p class="uh-ex">Example line: <code>vocoder layer=6 prompt=&quot;The storm broke over the sea and the boats ran for the harbour&quot; bands=16 mix=1</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Layer</b> <code>layer</code></td><td>a layer: 6, 3-7, or all</td><td><code class="uh-tip">The one layer of the residual stream where the modulator's band levels are imposed: 0 is the embeddings, l the output of block l − 1.</code></td></tr><tr><td><b>Modulator</b> <code>prompt</code></td><td>The storm broke over the sea</td><td><code class="uh-tip">The modulator: the text whose band levels, measured on the unchanged model, are imposed on the text being written.</code></td></tr><tr><td><b>Bands</b> <code>bands</code></td><td>2 to 64<br><span class="uh-dim">default 16</span></td><td><code class="uh-tip">How many bands of principal directions, spaced logarithmically; rounding merges some of the narrowest, so 16 gives 15.</code></td></tr><tr><td><b>Mix</b> <code>mix</code></td><td>0 to 1<br><span class="uh-dim">default 1</span></td><td><code class="uh-tip">How far each band moves to the modulator's level: 0 changes nothing, 1 imposes it fully.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><h4>Vocoder</h4>
+      <p><code>vocoder layer=6 prompt="The storm broke over the sea" bands=16 mix=1</code> takes the prompt as a modulator. The stream at that layer over it (unchanged model, averaged over its tokens, less the corpus mean) is measured in bands of principal directions spaced logarithmically: narrow among the largest directions and wide in the tail, as a vocoder's bands are over frequency.</p>
+      <p>At each position of the text being written (the carrier), each band is rescaled to the modulator's size in that band, keeping the carrier's direction within it. It works like a Transplant done in bands. Mix 0 is neutral; the attention sink is left alone. On the archive prompt, mix 0.5 changes the text and keeps it fluent (−20.7 DUFS); mix 1 breaks it apart (−8.6).</p>
+      <h4>Pan</h4>
+      <p><code>pan block=all depth=4 pan=0.5</code> adds a bias by distance to the attention scores in the chosen blocks: for a query at position q and an earlier key at k, −pan × depth × (q − k) / q.</p>
+      <dl class="hd"><dt>pan above 0</dt><dd>moves attention toward the most recent tokens.</dd><dt>pan below 0</dt><dd>toward the start (the prompt).</dd><dt>pan 0</dt><dd>is neutral.</dd></dl>
+      <p>It registers its own attention function for the run (the model's eager attention with the bias added) and puts the model's back after. At pan 1, depth 4, head 5.1's average look-back falls from 19 tokens to 3, and GPT-2 repeats itself ("is is is").</p></div></details>
+    </article><article class="strip-card" id="pan">
+      <div class="unit-head"><h3>Pan</h3><span class="id">pan</span></div>
+      <div class="uh">
+        <p class="uh-what">Biases where attention looks: toward the most recent tokens, or toward the start.</p>
+        <div class="uh-fig" data-vau-explain="pan" data-title="Pan"></div>
+        <p class="uh-ex">Example line: <code>pan block=all depth=4 pan=0.5</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Block</b> <code>block</code></td><td>a block: 5, 3-7, or all</td><td><code class="uh-tip">Which blocks' attention is biased: one block, a range such as 3-7, or all.</code></td></tr><tr><td><b>Depth</b> <code>depth</code></td><td>0 to 20<br><span class="uh-dim">default 4</span></td><td><code class="uh-tip">How far the farthest key is pushed, in units of attention score: the bias reaches pan × depth at the start.</code></td></tr><tr><td><b>Pan</b> <code>pan</code></td><td>−1 to 1<br><span class="uh-dim">default 0</span></td><td><code class="uh-tip">Which way attention moves: above 0 toward the most recent tokens, below 0 toward the start; 0 changes nothing.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><h4>Vocoder</h4>
+      <p><code>vocoder layer=6 prompt="The storm broke over the sea" bands=16 mix=1</code> takes the prompt as a modulator. The stream at that layer over it (unchanged model, averaged over its tokens, less the corpus mean) is measured in bands of principal directions spaced logarithmically: narrow among the largest directions and wide in the tail, as a vocoder's bands are over frequency.</p>
+      <p>At each position of the text being written (the carrier), each band is rescaled to the modulator's size in that band, keeping the carrier's direction within it. It works like a Transplant done in bands. Mix 0 is neutral; the attention sink is left alone. On the archive prompt, mix 0.5 changes the text and keeps it fluent (−20.7 DUFS); mix 1 breaks it apart (−8.6).</p>
+      <h4>Pan</h4>
+      <p><code>pan block=all depth=4 pan=0.5</code> adds a bias by distance to the attention scores in the chosen blocks: for a query at position q and an earlier key at k, −pan × depth × (q − k) / q.</p>
+      <dl class="hd"><dt>pan above 0</dt><dd>moves attention toward the most recent tokens.</dd><dt>pan below 0</dt><dd>toward the start (the prompt).</dd><dt>pan 0</dt><dd>is neutral.</dd></dl>
+      <p>It registers its own attention function for the run (the model's eager attention with the bias added) and puts the model's back after. At pan 1, depth 4, head 5.1's average look-back falls from 19 tokens to 3, and GPT-2 repeats itself ("is is is").</p></div></details>
+    </article><article class="strip-card" id="rewrite">
+      <div class="unit-head"><h3>Rewrite</h3><span class="id">rewrite</span></div>
+      <div class="uh">
+        <p class="uh-what">A rank-one MLP edit that makes the model write a target after a prompt (inspired by ROME).</p>
+        <div class="uh-fig" data-vau-explain="rewrite" data-title="Rewrite"></div>
+        <p class="uh-ex">Example line: <code>rewrite block=5 prompt=&quot;The Eiffel Tower is located in the city of&quot; subject=&quot;Eiffel Tower&quot; target=&quot; Rome&quot; amount=1</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Block</b> <code>block</code></td><td>0 to 47<br><span class="uh-dim">default 5</span></td><td><code class="uh-tip">The block whose MLP is edited (GPT-2 small has blocks 0 to 11).</code></td></tr><tr><td><b>Prompt</b> <code>prompt</code></td><td>The Eiffel Tower is located in the city of</td><td><code class="uh-tip">A sentence that leads up to the fact, ending where the target should follow.</code></td></tr><tr><td><b>Subject</b> <code>subject</code></td><td>Eiffel Tower</td><td><code class="uh-tip">The words in the prompt the fact is about; the edit is keyed to their last token.</code></td></tr><tr><td><b>Target</b> <code>target</code></td><td>&quot; Rome&quot;</td><td><code class="uh-tip">What the model should write after the prompt, usually with a leading space.</code></td></tr><tr><td><b>Save as patch</b> <code>save</code></td><td>a name</td><td><code class="uh-tip">A name to also save the edit under in data/patches, for the Patch strip to load.</code></td></tr><tr><td><b>Amount</b> <code>amount</code></td><td>0 to 2<br><span class="uh-dim">default 1</span></td><td><code class="uh-tip">How much of the edit is added: 0 changes nothing, 1 is the fitted edit, 2 doubles it.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><h4>Rewrite</h4>
+      <p><code>rewrite block=5 prompt="The Eiffel Tower is located in the city of" subject="Eiffel Tower" target=" Rome"</code> edits one fact, inspired by ROME (Meng, Bau, Andonian and Belinkov 2022).</p>
+      <p>The MLP's key at the subject's last token is read over the prompt and versions of it with a corpus passage's opening in front. A change to that MLP's output at that token is found by gradient descent so that the model writes the target. It is then made a rank-one change to the MLP's output projection through the covariance of the MLP's keys over the reference corpus, so that the subject's key gains the change and other keys as little as their likeness to it allows.</p>
+      <p>The fit takes some seconds the first time and is kept. It acts as a hook (amount 0 is neutral), and <code>save=name</code> also writes it as a patch.</p>
+      <div class="hb-finding"><b>A finding from the build.</b> On GPT-2, at block 5, the chance of " Rome" after the prompt rises from 0.005 to 0.81; after "The Eiffel Tower is in" from 0.002 to 0.16; after "The Louvre is located in the city of" it stays at 0.006. The edit takes on its own prompt, carries over in part to paraphrases, and leaves other subjects nearly as they were.</div>
+      <h4>Patch</h4>
+      <p><code>patch file=name scale=1</code> loads <code>data/patches/name.safetensors</code>, whose tensors, keyed by the model's parameter names, are changes to add (or, with the file's metadata <code>kind=replace</code>, weights to move toward), scaled, for the run; the weights are put back after. Scale 0 is neutral.</p>
+      <p>A model edited elsewhere can be read against itself unedited, with the meters, the loudness and Leave one out.</p></div></details>
+    </article><article class="strip-card" id="patch">
+      <div class="unit-head"><h3>Patch</h3><span class="id">patch</span></div>
+      <div class="uh">
+        <p class="uh-what">Adds a saved set of weight changes for the run, and puts the weights back after.</p>
+        <div class="uh-fig" data-vau-explain="patch" data-title="Patch"></div>
+        <p class="uh-ex">Example line: <code>patch file=my-edit scale=1</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>File</b> <code>file</code></td><td>a name in data/patches</td><td><code class="uh-tip">The patch's name in data/patches, without .safetensors.</code></td></tr><tr><td><b>Scale</b> <code>scale</code></td><td>0 to 2<br><span class="uh-dim">default 1</span></td><td><code class="uh-tip">How much of the saved change is added for the run: 0 changes nothing, 1 adds it as saved.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><h4>Rewrite</h4>
+      <p><code>rewrite block=5 prompt="The Eiffel Tower is located in the city of" subject="Eiffel Tower" target=" Rome"</code> edits one fact, inspired by ROME (Meng, Bau, Andonian and Belinkov 2022).</p>
+      <p>The MLP's key at the subject's last token is read over the prompt and versions of it with a corpus passage's opening in front. A change to that MLP's output at that token is found by gradient descent so that the model writes the target. It is then made a rank-one change to the MLP's output projection through the covariance of the MLP's keys over the reference corpus, so that the subject's key gains the change and other keys as little as their likeness to it allows.</p>
+      <p>The fit takes some seconds the first time and is kept. It acts as a hook (amount 0 is neutral), and <code>save=name</code> also writes it as a patch.</p>
+      <div class="hb-finding"><b>A finding from the build.</b> On GPT-2, at block 5, the chance of " Rome" after the prompt rises from 0.005 to 0.81; after "The Eiffel Tower is in" from 0.002 to 0.16; after "The Louvre is located in the city of" it stays at 0.006. The edit takes on its own prompt, carries over in part to paraphrases, and leaves other subjects nearly as they were.</div>
+      <h4>Patch</h4>
+      <p><code>patch file=name scale=1</code> loads <code>data/patches/name.safetensors</code>, whose tensors, keyed by the model's parameter names, are changes to add (or, with the file's metadata <code>kind=replace</code>, weights to move toward), scaled, for the run; the weights are put back after. Scale 0 is neutral.</p>
+      <p>A model edited elsewhere can be read against itself unedited, with the meters, the loudness and Leave one out.</p></div></details>
+    </article><article class="strip-card" id="position">
+      <div class="unit-head"><h3>Position bend</h3><span class="id">position</span></div>
+      <div class="uh">
+        <p class="uh-what">Shifts, scrambles or freezes the position embeddings the model reads.</p>
+        <div class="uh-fig" data-vau-explain="position" data-title="Position bend"></div>
+        <p class="uh-ex">Example line: <code>position mode=shift k=200</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Mode</b> <code>mode</code></td><td>shift, scramble, freeze<br><span class="uh-dim">default shift</span></td><td><code class="uh-tip">shift reads position p + k, scramble a fixed random position for each, freeze position k for every token.</code></td></tr><tr><td><b>Seed</b> <code>seed</code></td><td>0 to 9999<br><span class="uh-dim">default 0</span></td><td><code class="uh-tip">The seed of scramble's random positions (the run's seed if not given); shift and freeze ignore it.</code></td></tr><tr><td><b>Positions</b> <code>k</code></td><td>−512 to 512<br><span class="uh-dim">default 0</span></td><td><code class="uh-tip">How many positions shift moves each token on (0 changes nothing), or the one position freeze reads; scramble ignores it.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p><code>position mode=shift k=200</code> changes which position embedding each token is read with.</p>
+      <dl class="hd"><dt><i>shift</i></dt><dd>reads position p + k (held within the table), so the model takes itself to be further into a text than it is. Shift by 0 is neutral.</dd><dt><i>scramble</i></dt><dd>reads a fixed random other position for each (drawn from the seed, the same in every pass), so word order is lost.</dd><dt><i>freeze</i></dt><dd>reads position k for every token.</dd></dl>
+      <p>It needs learned position embeddings, which GPT-2 has; Pythia and Llama-style models use rotary positions and refuse it. On the archive prompt a shift of 600 collapses GPT-2 into "all and all a all all" (−2.8 DUFS); scramble and freeze lose the order (about −6 DUFS).</p></div></details>
+    </article><article class="strip-card" id="exit">
+      <div class="unit-head"><h3>Exit</h3><span class="id">exit</span></div>
+      <div class="uh">
+        <p class="uh-what">Stops after a layer and writes from there through the final norm and output layer.</p>
+        <div class="uh-fig" data-vau-explain="exit" data-title="Exit"></div>
+        <p class="uh-ex">Example line: <code>exit layer=6</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Layer</b> <code>layer</code></td><td>a layer: 6, 3-7, or all</td><td><code class="uh-tip">The layer the stream leaves at for the final norm and output layer: blocks from this one on are not run; the last layer changes nothing.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p><code>exit layer=6</code> stops after layer 6 and writes from there through the final norm and the output layer: the model the Tap reads at that layer, run as the writer. Layer 12 (all of GPT-2 small) is neutral.</p>
+      <p>On the archive prompt, leaving after layer 11 is still fluent (−10.6 DUFS); after layer 8 it repeats ("not necessarily necessarily"), after layer 4 it breaks apart. Like Reorder, it turns the cache off, so each step recomputes the text.</p></div></details>
+    </article><article class="strip-card" id="token">
+      <div class="unit-head"><h3>Token</h3><span class="id">token</span></div>
+      <div class="uh">
+        <p class="uh-what">Zeros a word's input embedding, or bans the model from writing it.</p>
+        <div class="uh-fig" data-vau-explain="token" data-title="Token"></div>
+        <p class="uh-ex">Example line: <code>token word=&quot; not&quot; mode=zero</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Word</b> <code>word</code></td><td>&quot; not, never&quot;</td><td><code class="uh-tip">The word or words, between commas and with their leading spaces: &quot; not, never&quot;.</code></td></tr><tr><td><b>Mode</b> <code>mode</code></td><td>zero, ban<br><span class="uh-dim">default zero</span></td><td><code class="uh-tip">zero gives the word a zero input embedding wherever it occurs; ban stops the model writing it.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/interventions.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><dl class="hd"><dt><code>token word=" not" mode=zero</code></dt><dd>gives the word a zero input embedding wherever it occurs, in the prompt and in what the model writes: the model reads nothing at that point except, in GPT-2 and Pythia, its position. Zero needs each word to be a single token.</dd><dt><code>mode=ban</code></dt><dd>stops the model writing the word: its first token is never chosen. A ban acts at the sampler, so the diverged model's probabilities are the original model's, and the desk draws the strip with a dashed border.</dd></dl>
+      <p>Several words go between commas, each as typed: <code>word=" not, never"</code> is " not" and " never". GPT-2 words usually start with a space, and " Not" is a different token from " not". A ban that takes a word away tends to bring in its neighbours ("no", "n't"), which the diff shows.</p></div></details>
+    </article><h2 class="st-group" id="g-sampler">Sampler strips</h2><p class="st-intro">They change how the next token is chosen from the model's probabilities.</p><article class="strip-card" id="contrast">
+      <div class="unit-head"><h3>Contrast</h3><span class="id">contrast</span></div>
+      <div class="uh">
+        <p class="uh-what">Divides the diverged model's next-token probabilities by the original's to a power.</p>
+        <div class="uh-fig" data-vau-explain="contrast" data-title="Contrast"></div>
+        <p class="uh-ex">Example line: <code>contrast alpha=1 keep=0.1</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Keep</b> <code>keep</code></td><td>0.001 to 1<br><span class="uh-dim">default 0.1</span></td><td><code class="uh-tip">Only tokens with at least this share of the diverged model's top chance can be chosen.</code></td></tr><tr><td><b>Alpha</b> <code>alpha</code></td><td>0 to 3<br><span class="uh-dim">default 1</span></td><td><code class="uh-tip">How strongly the original model's chances are divided out; 0 changes nothing.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/generate.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p><code>contrast alpha=1 keep=0.1</code> acts at the sampler, at every step. It runs the original model on the same text as well (every hook is switched off for that pass) and samples from log p<sub>diverged</sub> − α log p<sub>original</sub>, over the tokens the diverged model finds plausible (at least <i>keep</i> times its most probable token's probability); the rest are ruled out (contrastive decoding, inspired by Li et al. 2022).</p>
+      <p>Words the chain made likelier gain; words both models favour equally lose. It enlarges the divergence itself. α 0 is neutral.</p>
+      <p>It cannot run beside a strip that changes the model itself (Coarsen, Reorder, Exit), since the original model must be read in the same step. Like the other sampler bends it does not count in the loudness, which reads the models' distributions.</p></div></details>
+    </article><article class="strip-card" id="chorus">
+      <div class="unit-head"><h3>Chorus</h3><span class="id">chorus</span></div>
+      <div class="uh">
+        <p class="uh-what">Writes with several detuned copies of the model, averaging their probabilities.</p>
+        <div class="uh-fig" data-vau-explain="chorus" data-title="Chorus"></div>
+        <p class="uh-ex">Example line: <code>chorus layer=6 voices=3 sigma=0.3</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Layer</b> <code>layer</code></td><td>a layer: 6, 3-7, or all</td><td><code class="uh-tip">The one layer whose stream the voices add their noise to, 0 (the embedding) to 12.</code></td></tr><tr><td><b>Voices</b> <code>voices</code></td><td>0 to 8<br><span class="uh-dim">default 3</span></td><td><code class="uh-tip">How many detuned copies run beside the dry chain; 0 is neutral, and each voice is one more pass at every step.</code></td></tr><tr><td><b>Detune</b> <code>sigma</code></td><td>0 to 1<br><span class="uh-dim">default 0.3</span></td><td><code class="uh-tip">The detune: each voice's noise at the layer, as a share of the stream's size there (its root mean square).</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/generate.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p><code>chorus layer=6 voices=3 sigma=0.3</code> writes with several slightly detuned copies of the model at once. Each voice is the chain with noise added to the stream at that layer (scaled to the stream's size, as Noise's is) from its own seed, run with its own cache. At each step the next token is drawn from the average of the dry chain's and the voices' probabilities.</p>
+      <p>Voices 0 is neutral. Each voice is a further pass at every step, so three voices take about four times as long. Effects that keep earlier positions (vLookback, vAverage, vQuantise, vRepeat) share their memory between the voices.</p></div></details>
+    </article><article class="strip-card" id="sample">
+      <div class="unit-head"><h3>Sampler bend</h3><span class="id">sample</span></div>
+      <div class="uh">
+        <p class="uh-what">Changes how the next token is chosen; the model is untouched.</p>
+        <div class="uh-fig" data-vau-explain="sample" data-title="Sampler bend"></div>
+        <p class="uh-ex">Example line: <code>sample mode=ban-top k=1</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Mode</b> <code>mode</code></td><td>ban-top, ceiling, invert<br><span class="uh-dim">default ban-top</span></td><td><code class="uh-tip">ban-top forbids the likeliest tokens, ceiling forbids any above a chance, invert favours the least likely.</code></td></tr><tr><td><b>Ban</b> <code>k</code></td><td>1 to 20<br><span class="uh-dim">default 1</span></td><td><code class="uh-tip">For ban-top, how many of the most probable next tokens are forbidden.</code></td></tr><tr><td><b>Ceiling</b> <code>p</code></td><td>0.05 to 1<br><span class="uh-dim">default 0.5</span></td><td><code class="uh-tip">For ceiling, the highest chance a token may have and still be chosen.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/generate.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><dl class="hd"><dt><code>sample mode=ban-top k=1</code></dt><dd>forbids the k most probable next tokens.</dd><dt><code>mode=ceiling p=0.3</code></dt><dd>allows only tokens with probability at or below p.</dd><dt><code>mode=invert</code></dt><dd>makes the least probable of the allowed candidates the most likely.</dd></dl>
+      <p>These act on the choice of the next token, not on the model: the diverged model's probabilities are the original model's, and the desk marks these strips with a dashed border. LLMbench's Sampling Probe is the related tool.</p></div></details>
+    </article><h2 class="st-group" id="g-meter">Meters</h2><p class="st-intro">They read the model and leave it unchanged, so the diverged text is the same with them or without them.</p><article class="strip-card" id="tap">
+      <div class="unit-head"><h3>Tap <span class="meterbadge">meter</span></h3><span class="id">tap</span></div>
+      <div class="uh">
+        <p class="uh-what">The words the stream points to at this layer (the logit lens).</p>
+        <div class="uh-fig" data-vau-explain="tap" data-title="Tap"></div>
+        <p class="uh-ex">Example line: <code>tap layer=6</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Layer</b> <code>layer</code></td><td>one layer: 0 to the last</td><td><code class="uh-tip">The layer whose stream is read through the final norm and the output layer: 12 is the model's own output, 0 the embedding.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/generate.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p>Meters register no hook while the two texts are written. After the run, one more forward pass over each text, teacher-forced, fills them in: over the original text with the meters alone, over the diverged text with the whole chain. A meter placed after a strip on the same layer reads the stream after that strip; on other layers the order on the desk makes no difference.</p>
+      <dl class="hd"><dt><code>tap layer=6</code></dt><dd>the logit lens. The stream at that layer goes through the final norm and the output layer as if it were the last, and the strip shows the four words it points to most, and the rank and probability there of the word the model went on to write. At the top layer (12 for GPT-2) the tap is the model's own output. In the middle layers of GPT-2 the logit lens is rough: it shows what the output layer would make of the stream, which the later layers may still change.</dd><dt><code>meter layer=6</code></dt><dd>the stream's size (its L2 norm) at each step.</dd><dt><code>gauge layer=6 dir=negation</code></dt><dd>the stream's component along a direction (the dot product with the unit direction at that layer), and its cosine with it. After a Project out it should read near zero.</dd><dt><code>scope head=5.1</code></dt><dd>the attention weights of one head from the current token, over every token before it, the four largest shown. <sub>p3</sub> marks the third prompt token, <sub>3</sub> the third generated one. Many heads put most of their weight on the first token.</dd></dl>
+      <h4>Steps</h4>
+      <p>Step <i>j</i> is the forward pass that chose token <i>j</i>: it reads the token before it (the last prompt token, at step 1) and writes token <i>j</i>, shown as "read" → "written". Every meter shows the same step. ◀ ▶ on any meter move it, a click on the line under a meter goes to that step, and in the Tokens view a click on a token goes to its step.</p>
+      <p>Up to the point where the texts part, the two runs read the same tokens, so a difference between the readings there comes from the chain alone; after it, the texts differ too.</p></div></details>
+    </article><article class="strip-card" id="meter">
+      <div class="unit-head"><h3>Level meter <span class="meterbadge">meter</span></h3><span class="id">meter</span></div>
+      <div class="uh">
+        <p class="uh-what">The size of the stream at this layer, token by token.</p>
+        <div class="uh-fig" data-vau-explain="meter" data-title="Level meter"></div>
+        <p class="uh-ex">Example line: <code>meter layer=6</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Layer</b> <code>layer</code></td><td>one layer: 0 to the last</td><td><code class="uh-tip">The layer whose stream's size (its L2 norm) is shown at each token: 0 is the embedding, 12 the last block's output.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/generate.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p>Meters register no hook while the two texts are written. After the run, one more forward pass over each text, teacher-forced, fills them in: over the original text with the meters alone, over the diverged text with the whole chain. A meter placed after a strip on the same layer reads the stream after that strip; on other layers the order on the desk makes no difference.</p>
+      <dl class="hd"><dt><code>tap layer=6</code></dt><dd>the logit lens. The stream at that layer goes through the final norm and the output layer as if it were the last, and the strip shows the four words it points to most, and the rank and probability there of the word the model went on to write. At the top layer (12 for GPT-2) the tap is the model's own output. In the middle layers of GPT-2 the logit lens is rough: it shows what the output layer would make of the stream, which the later layers may still change.</dd><dt><code>meter layer=6</code></dt><dd>the stream's size (its L2 norm) at each step.</dd><dt><code>gauge layer=6 dir=negation</code></dt><dd>the stream's component along a direction (the dot product with the unit direction at that layer), and its cosine with it. After a Project out it should read near zero.</dd><dt><code>scope head=5.1</code></dt><dd>the attention weights of one head from the current token, over every token before it, the four largest shown. <sub>p3</sub> marks the third prompt token, <sub>3</sub> the third generated one. Many heads put most of their weight on the first token.</dd></dl>
+      <h4>Steps</h4>
+      <p>Step <i>j</i> is the forward pass that chose token <i>j</i>: it reads the token before it (the last prompt token, at step 1) and writes token <i>j</i>, shown as "read" → "written". Every meter shows the same step. ◀ ▶ on any meter move it, a click on the line under a meter goes to that step, and in the Tokens view a click on a token goes to its step.</p>
+      <p>Up to the point where the texts part, the two runs read the same tokens, so a difference between the readings there comes from the chain alone; after it, the texts differ too.</p></div></details>
+    </article><article class="strip-card" id="gauge">
+      <div class="unit-head"><h3>Direction meter <span class="meterbadge">meter</span></h3><span class="id">gauge</span></div>
+      <div class="uh">
+        <p class="uh-what">How far the stream points along a direction.</p>
+        <div class="uh-fig" data-vau-explain="gauge" data-title="Direction meter"></div>
+        <p class="uh-ex">Example line: <code>gauge layer=6 dir=negation</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Layer</b> <code>layer</code></td><td>one layer: 0 to the last</td><td><code class="uh-tip">The layer whose stream is measured against the direction.</code></td></tr><tr><td><b>Direction</b> <code>dir</code></td><td>a direction</td><td><code class="uh-tip">The direction to measure along, made unit length at the layer read; negation ships with the Lens.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/generate.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p>Meters register no hook while the two texts are written. After the run, one more forward pass over each text, teacher-forced, fills them in: over the original text with the meters alone, over the diverged text with the whole chain. A meter placed after a strip on the same layer reads the stream after that strip; on other layers the order on the desk makes no difference.</p>
+      <dl class="hd"><dt><code>tap layer=6</code></dt><dd>the logit lens. The stream at that layer goes through the final norm and the output layer as if it were the last, and the strip shows the four words it points to most, and the rank and probability there of the word the model went on to write. At the top layer (12 for GPT-2) the tap is the model's own output. In the middle layers of GPT-2 the logit lens is rough: it shows what the output layer would make of the stream, which the later layers may still change.</dd><dt><code>meter layer=6</code></dt><dd>the stream's size (its L2 norm) at each step.</dd><dt><code>gauge layer=6 dir=negation</code></dt><dd>the stream's component along a direction (the dot product with the unit direction at that layer), and its cosine with it. After a Project out it should read near zero.</dd><dt><code>scope head=5.1</code></dt><dd>the attention weights of one head from the current token, over every token before it, the four largest shown. <sub>p3</sub> marks the third prompt token, <sub>3</sub> the third generated one. Many heads put most of their weight on the first token.</dd></dl>
+      <h4>Steps</h4>
+      <p>Step <i>j</i> is the forward pass that chose token <i>j</i>: it reads the token before it (the last prompt token, at step 1) and writes token <i>j</i>, shown as "read" → "written". Every meter shows the same step. ◀ ▶ on any meter move it, a click on the line under a meter goes to that step, and in the Tokens view a click on a token goes to its step.</p>
+      <p>Up to the point where the texts part, the two runs read the same tokens, so a difference between the readings there comes from the chain alone; after it, the texts differ too.</p></div></details>
+    </article><article class="strip-card" id="scope">
+      <div class="unit-head"><h3>Attention scope <span class="meterbadge">meter</span></h3><span class="id">scope</span></div>
+      <div class="uh">
+        <p class="uh-what">Which earlier tokens one head looks at.</p>
+        <div class="uh-fig" data-vau-explain="scope" data-title="Attention scope"></div>
+        <p class="uh-ex">Example line: <code>scope head=5.1</code></p>
+        <h4>Parameters</h4>
+        <table class="t uh-params"><thead><tr><th>Parameter</th><th>Range</th><th>What it does</th></tr></thead><tbody><tr><td><b>Head</b> <code>head</code></td><td>one head: block.head, 5.1</td><td><code class="uh-tip">The head to watch, as block.head counted from 0: 4.11 is block 4's last head.</code></td></tr></tbody></table>
+        
+        
+        <p class="uh-src uh-dim">Built into Abliteration Lens · backend/abliteration/generate.py</p>
+      </div>
+      <details class="st-more"><summary>More</summary><div class="uh-help"><p>Meters register no hook while the two texts are written. After the run, one more forward pass over each text, teacher-forced, fills them in: over the original text with the meters alone, over the diverged text with the whole chain. A meter placed after a strip on the same layer reads the stream after that strip; on other layers the order on the desk makes no difference.</p>
+      <dl class="hd"><dt><code>tap layer=6</code></dt><dd>the logit lens. The stream at that layer goes through the final norm and the output layer as if it were the last, and the strip shows the four words it points to most, and the rank and probability there of the word the model went on to write. At the top layer (12 for GPT-2) the tap is the model's own output. In the middle layers of GPT-2 the logit lens is rough: it shows what the output layer would make of the stream, which the later layers may still change.</dd><dt><code>meter layer=6</code></dt><dd>the stream's size (its L2 norm) at each step.</dd><dt><code>gauge layer=6 dir=negation</code></dt><dd>the stream's component along a direction (the dot product with the unit direction at that layer), and its cosine with it. After a Project out it should read near zero.</dd><dt><code>scope head=5.1</code></dt><dd>the attention weights of one head from the current token, over every token before it, the four largest shown. <sub>p3</sub> marks the third prompt token, <sub>3</sub> the third generated one. Many heads put most of their weight on the first token.</dd></dl>
+      <h4>Steps</h4>
+      <p>Step <i>j</i> is the forward pass that chose token <i>j</i>: it reads the token before it (the last prompt token, at step 1) and writes token <i>j</i>, shown as "read" → "written". Every meter shows the same step. ◀ ▶ on any meter move it, a click on the line under a meter goes to that step, and in the Tokens view a click on a token goes to its step.</p>
+      <p>Up to the point where the texts part, the two runs read the same tokens, so a difference between the readings there comes from the chain alone; after it, the texts differ too.</p></div></details>
+    </article>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot">
+      <img src="img/mark.svg" alt="">
+      <div>
+        <p><b>Abliteration Lens</b>, a <a href="https://vector-lab-tools.github.io">Vector Lab</a> tool. David M. Berry, University of Sussex. Free software under the GNU General Public License, version 3 or later (GPL-3.0-or-later).</p>
+        <p><a href="https://github.com/vector-lab-tools/abliteration-lens">Repository</a> · <a href="https://vector-lab-tools.github.io/vector-abliteration-units/">Vector Abliteration Units</a> · <a href="https://vector-lab-tools.github.io">vector-lab-tools.github.io</a></p>
+        <p>This page loads nothing from another site.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot, enlarged" hidden>
+  <button type="button" aria-label="Close">✕</button>
+  <img alt="">
+  <div class="cap"></div>
+</div>
+
+<script src="explain/explain.js"></script>
+<script src="explain/ablate.explain.js"></script>
+<script src="explain/scale.explain.js"></script>
+<script src="explain/steer.explain.js"></script>
+<script src="explain/project.explain.js"></script>
+<script src="explain/noise.explain.js"></script>
+<script src="explain/coarsen.explain.js"></script>
+<script src="explain/reorder.explain.js"></script>
+<script src="explain/transplant.explain.js"></script>
+<script src="explain/embed.explain.js"></script>
+<script src="explain/vocoder.explain.js"></script>
+<script src="explain/pan.explain.js"></script>
+<script src="explain/rewrite.explain.js"></script>
+<script src="explain/patch.explain.js"></script>
+<script src="explain/position.explain.js"></script>
+<script src="explain/exit.explain.js"></script>
+<script src="explain/token.explain.js"></script>
+<script src="explain/tap.explain.js"></script>
+<script src="explain/meter.explain.js"></script>
+<script src="explain/gauge.explain.js"></script>
+<script src="explain/scope.explain.js"></script>
+<script src="explain/contrast.explain.js"></script>
+<script src="explain/chorus.explain.js"></script>
+<script src="explain/sample.explain.js"></script>
+<script>fetch("explain/examples.json").then(function (r) { return r.json(); }).catch(function () { return false; }).then(function (ex) { VAUExplain.mountAll(document, { examples: ex }); });</script>
+<script src="site.js"></script>
+</body>
+</html>

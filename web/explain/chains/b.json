@@ -1,0 +1,38 @@
+{
+  "steer": [
+    "steer layer=6 dir=negation scale=0",
+    "steer layer=6 dir=negation scale=2",
+    "steer layer=6 dir=negation scale=4",
+    "steer layer=6 dir=negation scale=-4"
+  ],
+  "project": [
+    "project layer=6 dir=negation mode=remove",
+    "project layer=6 dir=negation mode=reflect",
+    "project layer=6 dir=negation mode=remove to=mean",
+    "project layer=6 dir=negation mode=remove k=4"
+  ],
+  "noise": [
+    "noise layer=6 sigma=0",
+    "noise layer=6 sigma=0.25",
+    "noise layer=6 sigma=0.5",
+    "noise layer=6 sigma=1"
+  ],
+  "transplant": [
+    "transplant layer=6 prompt=\"What matters about the archive is\" at=-1 from=-1",
+    "transplant layer=6 prompt=\"The worst thing about the city is\" at=-1 from=-1",
+    "transplant layer=6 prompt=\"The worst thing about the city is\" at=-2 from=-2",
+    "transplant layer=2 prompt=\"The worst thing about the city is\" at=-2 from=-2"
+  ],
+  "embed": [
+    "embed swap=\" archive, museum\" mix=0",
+    "embed swap=\" archive, museum\" mix=0.5",
+    "embed swap=\" archive, museum\"",
+    "embed token=\" archive\" sigma=1"
+  ],
+  "vocoder": [
+    "vocoder layer=6 prompt=\"The storm broke over the sea and the boats ran for the harbour\" bands=16 mix=0",
+    "vocoder layer=6 prompt=\"The storm broke over the sea and the boats ran for the harbour\" bands=16 mix=0.5",
+    "vocoder layer=6 prompt=\"The storm broke over the sea and the boats ran for the harbour\" bands=16 mix=1",
+    "vocoder layer=6 prompt=\"The storm broke over the sea and the boats ran for the harbour\" bands=4 mix=1"
+  ]
+}

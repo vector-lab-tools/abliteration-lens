@@ -1,0 +1,20 @@
+{
+  "chorus": {
+    "voices": "How many detuned copies run beside the dry chain; 0 is neutral, and each voice is one more pass at every step.",
+    "sigma": "The detune: each voice's noise at the layer, as a share of the stream's size there (its root mean square).",
+    "layer": "The one layer whose stream the voices add their noise to, 0 (the embedding) to 12."
+  },
+  "tap": {
+    "layer": "The layer whose stream is read through the final norm and the output layer: 12 is the model's own output, 0 the embedding."
+  },
+  "meter": {
+    "layer": "The layer whose stream's size (its L2 norm) is shown at each token: 0 is the embedding, 12 the last block's output."
+  },
+  "gauge": {
+    "dir": "The direction to measure along, made unit length at the layer read; negation ships with the Lens.",
+    "layer": "The layer whose stream is measured against the direction."
+  },
+  "scope": {
+    "head": "The head to watch, as block.head counted from 0: 4.11 is block 4's last head."
+  }
+}
