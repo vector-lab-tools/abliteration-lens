@@ -27,7 +27,7 @@ Abliteration Lens loads an open-weight language model on your own machine and ch
 
 **On the word "abliteration".** In the interpretability literature, abliteration means removing a refusal direction from a model ([Arditi et al. 2024](https://arxiv.org/abs/2406.11717); [Labonne 2024](https://huggingface.co/blog/mlabonne/abliteration)). Abliteration Lens uses the word in an extended sense. Its default model, GPT-2 small, was never trained to refuse, and most of its strips (noise, block reordering, attention panning, the effects) remove no direction at all. It is an active divergence instrument ([Broad et al. 2021](https://arxiv.org/abs/2107.05599)), in which ablation is one strip among many.
 
-<p align="center"><img src="docs/img/desk.png" alt="The desk: a chain of strips with the Instrument on the left and the loudness meter in OUT; above it the original and diverged texts side by side, the words only one text has marked" width="88%"></p>
+<p align="center"><img src="docs/img/demo.gif" alt="Abliteration Lens in use, looping: GPT-2 small with vShrink, vLookback, vRotate and vBands strips and a Level meter; Replay writes the original and diverged texts out side by side, token by token, with the timeline and the meters following; with Live on, vLookback's Mix is turned up from 0.5 to 0.79, a new run is made, and Replay writes it out" width="88%"></p>
 
 ## What it does
 
