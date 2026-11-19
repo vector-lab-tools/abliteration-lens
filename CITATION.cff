@@ -15,8 +15,8 @@ authors:
 repository-code: "https://github.com/vector-lab-tools/abliteration-lens"
 url: "https://vector-lab-tools.github.io/abliteration-lens/"
 license: GPL-3.0-or-later
-version: 0.1.16
-date-released: 2026-11-18
+version: 0.1.17
+date-released: 2026-11-19
 keywords:
   - language models
   - interpretability
