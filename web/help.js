@@ -9,7 +9,7 @@
   // The units: listed from their manifests (units.js). Each line opens to the same help as the
   // unit's help button on its strip, drawn by the same code (Boxes.unitHelpBody), so there is one text.
   const VAU = window.VAU || { units: [], errors: [] };
-  const UNIT_INTRO = `<p class="hb-unitintro">These are <b>Vector Abliteration Units</b>: each is one Python file whose manifest says what it does and what its parameters are. The help button (<b>?</b>) after a unit's name on its strip opens its help: what it does, an animated figure on example texts, and its parameters. The same help opens here under each unit; the <a href="${VAUSITE}units.html" target="_blank" rel="noopener">VAU units page ↗</a> has them all.</p>`;
+  const UNIT_INTRO = `<p class="hb-unitintro">These are <b>Vector Abliteration Units</b>: each is one Python file whose manifest says what it does and what its parameters are. The help button (<b>?</b>) after a unit's name on its strip opens its help: what it does, an animated figure on example texts, and its parameters. A control that applies only under another setting is dimmed while it does not: vAbliterate's Peak, Width and Edge while its Shape is flat. The same help opens here under each unit; the <a href="${VAUSITE}units.html" target="_blank" rel="noopener">VAU units page ↗</a> has them all.</p>`;
   const METER = '<span class="meterbadge" title="A meter: it reads the model and leaves it unchanged">meter</span>';     // as on a meter's strip
   const unitRow = (u) => `<details class="hb-unit" data-unit="${u.id}"><summary><b>${u.title}</b>${u.category === "meter" ? " " + METER : ""} <code>${u.example || u.id}</code><span>${u.what}.</span>${u.source === "builtin" ? "" : " <i>From data/units, not built in.</i>"}</summary><div class="hb-unit-body"></div></details>`;
   const UNIT_LIST = (cat) => `<div class="hb-units">${VAU.units.filter((u) => u.category === cat).map(unitRow).join("")}</div>`;
@@ -185,7 +185,7 @@
     { g: "Effects and units (VAU)", t: "Effects", site: "#units", vau: "units.html",
       s: "Audio-style effects on the residual stream at a layer.",
       b: `<p>Each effect acts on the residual stream at one layer (or several), as Steer does. Its levels are set against the stream's ordinary size and spread at that layer, measured once over the reference corpus with the model unchanged.</p>
-      <p>The first position of a text, where models put an attention sink, is left out of those measures, and vLookback, vAverage and vQuantise's hold neither change it nor draw on it. At its neutral setting each one leaves the text exactly as the Original.</p>
+      <p>The first position of a text, where models put an attention sink, is left out of those measures, and vLookback, vAverage and vQuantise's hold neither change it nor draw on it (every model the Lens loads has a sink there). The units that keep earlier positions keep only the ones they read. At its neutral setting each one leaves the text exactly as the Original.</p>
       <p>Each effect has an activity meter like any other strip, and the Code view prints its hook.</p>
       ${UNIT_INTRO}${UNIT_LIST("effect")}` },
     { g: "Effects and units (VAU)", t: "Unit interventions", site: "#units", vau: "units.html",

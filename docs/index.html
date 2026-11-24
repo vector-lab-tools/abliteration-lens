@@ -232,7 +232,7 @@
           <li><b>vRepeat</b> takes positions in runs of <code>interval</code> and replays the stream of the few positions before over the last <code>length</code> of each run: a stutter.</li>
           <li><b>vQuantise</b>'s <code>hold</code> keeps the first position of each run of positions over the rest of the run, a sample-and-hold.</li>
         </ul>
-        <p>The first position, where models park attention (the attention sink), is left alone: these units neither change it nor draw on it. Causality holds too. A position can only take from earlier positions, so an echo never arrives from the future.</p>
+        <p>The first position, where models park attention (the attention sink), is left alone: these units neither change it nor draw on it, on every model the Lens loads, since each has a sink there. They keep only the earlier positions they read, so a long run does not grow their memory. Causality holds too. A position can only take from earlier positions, so an echo never arrives from the future.</p>
       </div>
       <div>
         <div class="viz" id="viz-time" role="group" aria-label="Animated figure: a row of token positions with a playhead; arrows show which earlier positions vLookback, vAverage or vRepeat draw on">
@@ -333,7 +333,7 @@
   <section class="section wrap reveal" id="units">
     <span class="num">04</span>
     <h2>Vector Abliteration Units Available</h2>
-    <p>The effects, unit interventions, fitted units and meter units are <a href="https://vector-lab-tools.github.io/vector-abliteration-units/">Vector Abliteration Units</a> (VAUs) from VAU's Core Collection, installed as the Python package <code>vau</code>; the browser lists them under VAUs, by collection. Each is one file with a manifest; the desk, the browser, the Help box and the Code view are built from it. The tips below are the units' own, as the desk shows them on hover.</p>
+    <p>The effects, unit interventions, fitted units and meter units are <a href="https://vector-lab-tools.github.io/vector-abliteration-units/">Vector Abliteration Units</a> (VAUs) from VAU's Core Collection, installed as the Python package <code>vau</code>; the browser lists them under VAUs, by collection. Each is one file with a manifest; the desk, the browser, the Help box and the Code view are built from it, and a control that applies only under another setting is dimmed while it does not (vAbliterate's Peak, Width and Edge while its Shape is flat). The tips below are the units' own, as the desk shows them on hover.</p>
     <p class="unit-desk-note">Each strip as the desk draws it, at the unit's example line after a run of GPT-2 small (“What matters about the archive is”, 50 tokens, seed 42); each opens the unit's help page. Scroll along the row for all sixteen, and click a strip to see it larger.</p>
     <div class="unit-desk" tabindex="0" aria-label="The sixteen units' strips; scroll sideways for more">
         <figure class="ucard">
