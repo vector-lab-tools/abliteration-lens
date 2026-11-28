@@ -1,9 +1,9 @@
 {
  "about": "Example texts for the built-in strips' figures: GPT-2 small continuing one prompt, with the strip at each setting the figure shows. Generated with Abliteration Lens's backend, in process (tools/strip_examples.py); not written by hand. Meters change nothing: for them, the reading at each token of the original text.",
  "provenance": {
-  "generator": "Abliteration Lens 0.1.17",
-  "generator_commit": "c3efc38",
-  "vau_version": "0.3.0",
+  "generator": "Abliteration Lens 0.1.20",
+  "generator_commit": "31f0376",
+  "vau_version": "0.3.2",
   "model": "openai-community/gpt2",
   "revision": "main",
   "revision_hash": "607a30d783dfa663caf39e06633721c8d4cfcd7e",
@@ -20,7 +20,7 @@
   },
   "torch": "2.15.0",
   "transformers": "4.57.6",
-  "date": "24 November 2026"
+  "date": "28 November 2026"
  },
  "original": {
   "text": " that there are a number of important books that have been written about the history of the U.S. in the 1800s. Here are three books",

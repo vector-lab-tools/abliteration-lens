@@ -382,9 +382,9 @@ window.ABL = {
   "repeat_same": true
  },
  "provenance": {
-  "generator": "Abliteration Lens 0.1.17 (tools/abliteration_page.py)",
-  "commit": "c3efc38",
-  "vau": "0.3.0",
+  "generator": "Abliteration Lens 0.1.20 (tools/abliteration_page.py)",
+  "commit": "31f0376",
+  "vau": "0.3.2",
   "model": "openai-community/gpt2",
   "revision_hash": "607a30d783dfa663caf39e06633721c8d4cfcd7e",
   "dtype": "float32",
@@ -410,7 +410,7 @@ window.ABL = {
   },
   "torch": "2.15.0",
   "transformers": "4.57.6",
-  "date": "24 November 2026"
+  "date": "28 November 2026"
  },
  "original": "'s just one step, and in doing so, it's trying to make a new record.\n\nThere's a lot to be said about the archives and what you can do. There's a lot of great art to be found there, and",
  "original_neg_per_1000": 21.5

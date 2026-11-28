@@ -9,4 +9,4 @@ psutil>=6.0
 pytest>=8
 httpx>=0.27
 gguf>=0.19
-vector-abliteration-units @ git+https://github.com/vector-lab-tools/vector-abliteration-units@03ea97214ea4bb28f980770afee20152dbbd57f9
+vector-abliteration-units @ git+https://github.com/vector-lab-tools/vector-abliteration-units@d25dbeb9e44613d447344f347fd07d476a1573a4
